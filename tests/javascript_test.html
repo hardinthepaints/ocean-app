@@ -1,0 +1,59 @@
+<!doctype html>
+    
+<!-- An html page to test the server by querying for data and displaying the data.
+    To run:
+        Run the server.
+        Open this file in browser.
+        The raw data should appear after a moment.
+-->
+
+<html lang="en">
+<head>
+    <title>Cross domain ajax request using json padding</title>
+    
+     <script src="jquery-3.1.1.min.js"></script>
+</head>
+<body>
+    
+    <h1>Server test</h1>
+    
+    <p id="status">html loaded</p>
+
+    <p id="data">*no json data*</p>
+
+    
+    <script>
+        
+        const _url = "http://localhost:5000/jsonp"
+        
+        //callback function with the object resulting from the json data
+        function logResult(json){
+            document.getElementById("status").innerHTML = 'Received data!';
+            
+            console.log(json);
+            
+            var salt = json.salt;
+            var latp = json.latp;
+            var lonp = json.lonp;
+            var list = [];
+            
+            /* Display the data */
+            document.getElementById("data").innerHTML = salt;
+
+        }
+        
+        document.getElementById("status").innerHTML = 'Making ajax request...';
+        
+        /* 'JSON Padded' Cross-origin Ajax request to the server */
+        $.ajax({
+            url: _url,
+            dataType: "jsonp",
+            jsonpCallback: "logResult"
+        });
+        
+        document.getElementById("status").innerHTML = 'Awaiting response from ' + _url;
+
+    
+    </script>
+</body>
+</html>
