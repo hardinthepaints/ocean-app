@@ -2,8 +2,6 @@
 #Ocean App
 
 
-![Heatmap rendered with plotly.js](app/static/Test.png?raw=true "Heatmap rendered with plotly.js")
-
 <div style="text-align:center"><img src ="app/static/Test.png?" /></div>
 ## Synopsis
 
