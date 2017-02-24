@@ -2,7 +2,7 @@
 #Ocean App
 
 
-<div style="text-align:center"><img src ="app/static/Test.png?" /></div>
+<div style="align:center"><img src ="app/static/Test.png?" /></div>
 ## Synopsis
 
 This is a project to create a client-side web app which displays oceanography data in time-lapse form. 
