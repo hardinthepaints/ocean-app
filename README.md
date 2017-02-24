@@ -1,12 +1,9 @@
-
-
-
 <h1 align="center">Ocean App<h1/>
-
 
 <p align="center">
     <img src ="app/static/Test.png?" />
 </p>
+
 ## Synopsis
 
 This is a project to create a client-side web app which displays oceanography data in time-lapse form. 
@@ -14,7 +11,7 @@ This is a project to create a client-side web app which displays oceanography da
 ## Installation
 
 1. Download .zip of repository
-2. Install Flask with `pip install Flask`
+2. Install requirements: `pip install -r requirements.txt`
 3. On OS X, Linux and Cygwin you mush indicate 'run.py' is an executable file: `chmod a+x run.py`
 4. Execute the script to start the server. `./run.py` or `python3 run.py`
 5. In your browser, open tests/javascript/javascript_test.html
