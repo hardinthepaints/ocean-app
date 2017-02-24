@@ -1,13 +1,11 @@
 
+
+||
 #Ocean App
 
 
 <p align="center">
-    <h1>Ocean App</ht>
-
     <img src ="app/static/Test.png?" />
-
-
 </p>
 ## Synopsis
 
