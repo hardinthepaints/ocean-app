@@ -1,13 +1,10 @@
 
 
-#|Ocean App|
 
 <h1 align="center">Ocean App<h1/>
 
 
-<p align="center">
-    <img src ="app/static/Test.png?" />
-</p>
+    <img align = "middle" src ="app/static/Test.png?" />
 ## Synopsis
 
 This is a project to create a client-side web app which displays oceanography data in time-lapse form. 
