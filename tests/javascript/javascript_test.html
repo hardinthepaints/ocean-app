@@ -31,11 +31,7 @@
     <p id="status">html loaded</p>
     
     <div id="myDiv" ></div>
-    
-    <!-- <img src="../../app/static/Test.png" id="output" style="width:600px;height:600px;"/> -->
-    
-    <img id="jpg-export"></img>
-        
+                
     <script>
         
         const _url = "http://localhost:5000/jsonp"
@@ -70,11 +66,12 @@
             
         }
         
+        /* Request a single layer to render a frame */
         makeAJAX( 1 );
+        
+        /* request multiple layers to render an animation*/
         makeAJAX( 40 );
-        
-
-        
+ 
         document.getElementById("status").innerHTML = 'Awaiting response from ' + _url;
 
     
