@@ -1,5 +1,5 @@
 
-|#Ocean App|
+#Ocean App
 ![Heatmap rendered with plotly.js](app/static/Test.png?raw=true "Heatmap rendered with plotly.js")
 ## Synopsis
 
