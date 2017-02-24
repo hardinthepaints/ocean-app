@@ -2,7 +2,9 @@
 #Ocean App
 
 
-|![Heatmap rendered with plotly.js](app/static/Test.png?raw=true "Heatmap rendered with plotly.js")|
+![Heatmap rendered with plotly.js](app/static/Test.png?raw=true "Heatmap rendered with plotly.js")
+
+<div style="text-align:center"><img src ="app/static/Test.png?" /></div>
 ## Synopsis
 
 This is a project to create a client-side web app which displays oceanography data in time-lapse form. 
