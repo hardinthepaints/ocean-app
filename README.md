@@ -13,6 +13,12 @@ This is a project to create a client-side web app which displays oceanography da
 4. Execute the script to start the server. `./run.py` or `python3 run.py`
 5. In your browser, open tests/javascript/javascript_test.html
 
+## Usage
+
+1. Start the flask server: `./run.py` or `python3 run.py` in the root directory.
+2. Open tests/javascript/javascript_test.html in a browser.
+3. According to [Plotly benchmarks](https://plot.ly/benchmarks/ "this"), Chrome is the fastest browser for rendering heatmaps.
+
 ## License
 
 MIT

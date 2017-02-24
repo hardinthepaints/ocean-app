@@ -20,6 +20,8 @@ dataFN = 'app/static/ocean_his_0002.nc'
 @app.route('/index')
 def index():
     
+    
+    
     output = getData()
        
     return Response(json.dumps(output), mimetype='application/json')
@@ -28,7 +30,8 @@ def index():
 @app.route('/jsonp')
 def jsonp():
        
-    output = getData()
+    layers = int( request.args.get('layers', 1) )
+    output = getData( layers )
     
     callback = request.args.get('callback')
        
@@ -45,12 +48,16 @@ def numpyToArray( numpy ):
     return numpy.tolist()
 
 #open a .nc file and collect data
-def getData():
+#Return the specified number of layers
+def getData( layers = 0 ):
     ds = nc.Dataset( dataFN )
     
+    #ensure the layers correspond to correct indexes
+    layers = min( layers, len( ds.variables['salt'][0]) )
+    layers = max( layers, 1 )
     
     salts = []
-    for i in range( len( ds.variables['salt'][0])):
+    for i in range( layers ):
         salt = ds.variables['salt'][0, i, :, :].squeeze()
         salt = numpyToArray(salt)
         salts.append(salt)

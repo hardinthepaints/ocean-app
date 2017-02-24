@@ -1,6 +1,6 @@
 <!doctype html>
     
-<!-- An html page to test the server by querying for data and displaying the data.
+<!-- An html page to test the server by querying for and displaying the data.
     To run:
         Run the server.
         Open this file in browser.
@@ -9,7 +9,7 @@
 
 <html lang="en">
 <head>
-    <title>Plotly Tutorial</title>
+    <title>Javascript Test</title>
     
     <!-- jquery -->
     <script src="jquery-3.1.1.min.js"></script>
@@ -19,6 +19,9 @@
     
     <!-- code which makes the plotly heatmap -->
     <script src="myheatmap.js"></script>
+    
+    <script src="gif-master/dist/gif.js"></script>
+
 
 </head>
 <body>
@@ -28,29 +31,49 @@
     <p id="status">html loaded</p>
     
     <div id="myDiv" ></div>
+    
+    <!-- <img src="../../app/static/Test.png" id="output" style="width:600px;height:600px;"/> -->
+    
+    <img id="jpg-export"></img>
         
     <script>
         
         const _url = "http://localhost:5000/jsonp"
         
         //callback function with the object resulting from the json data
-        function logResult(json){
+        function processJSON(json){
             document.getElementById("status").innerHTML = 'Received data!';
             
             console.log("received json object: " + json);
             
+            if ( json.salts.length > 1) {
+                console.log("rendering multiple frames...")
+                animatedHeatmap( "myDiv", json);     
+            } else {
+                console.log("rendering single frame...")
+                heatmap( "myDiv", json);
+            }
             
-            makeHeatmap( "myDiv", json);
         }
         
-        document.getElementById("status").innerHTML = 'Making ajax request...';
+        function makeAJAX( _layers ) {
+            document.getElementById("status").innerHTML = 'Making ajax request...';
         
-        /* 'JSON Padded' Cross-origin Ajax request to the server */
-        $.ajax({
-            url: _url,
-            dataType: "jsonp",
-            jsonpCallback: "logResult"
-        });
+            /* 'JSON Padded' Cross-origin Ajax request to the server */
+            $.ajax({
+                url: _url,
+                dataType: "jsonp",
+                data: { layers: _layers},
+                jsonpCallback: "processJSON",
+            });
+            
+            
+        }
+        
+        makeAJAX( 1 );
+        makeAJAX( 40 );
+        
+
         
         document.getElementById("status").innerHTML = 'Awaiting response from ' + _url;
 
