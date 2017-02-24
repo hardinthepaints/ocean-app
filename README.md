@@ -2,6 +2,10 @@
 
 #|Ocean App|
 
+<p align="center">
+    <h1>Ocean App<h1/>
+</p>
+
 
 <p align="center">
     <img src ="app/static/Test.png?" />
