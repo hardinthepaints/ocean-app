@@ -9,18 +9,25 @@
 
 <html lang="en">
 <head>
-    <title>Cross domain ajax request using json padding</title>
+    <title>Plotly Tutorial</title>
     
-     <script src="jquery-3.1.1.min.js"></script>
+    <!-- jquery -->
+    <script src="jquery-3.1.1.min.js"></script>
+     
+    <!-- plotly -->
+    <script src="plotly-latest.min.js"></script>
+    
+    <!-- code which makes the plotly heatmap -->
+    <script src="myheatmap.js"></script>
+
 </head>
 <body>
     
     <h1>Server test</h1>
     
     <p id="status">html loaded</p>
-
-    <p id="data">*no json data*</p>
-
+    
+    <div id="myDiv" ></div>
     
     <script>
         
@@ -30,16 +37,10 @@
         function logResult(json){
             document.getElementById("status").innerHTML = 'Received data!';
             
-            console.log(json);
+            console.log("received json object: " + json);
             
-            var salt = json.salt;
-            var latp = json.latp;
-            var lonp = json.lonp;
-            var list = [];
             
-            /* Display the data */
-            document.getElementById("data").innerHTML = salt;
-
+            makeHeatmap( "myDiv", json);
         }
         
         document.getElementById("status").innerHTML = 'Making ajax request...';
