@@ -2,9 +2,7 @@
 
 #|Ocean App|
 
-<p align="center">
-    <h1>Ocean App<h1/>
-</p>
+<h1 align="center">Ocean App<h1/>
 
 
 <p align="center">
