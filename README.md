@@ -1,7 +1,6 @@
 
 
-||
-#Ocean App
+#|Ocean App|
 
 
 <p align="center">
