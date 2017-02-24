@@ -1,3 +1,6 @@
+
+
+![Cover](app/static/test.png?raw=true "Cover")
 ## Synopsis
 
 This is a project to create a client-side web app which displays oceanography data in time-lapse form. 

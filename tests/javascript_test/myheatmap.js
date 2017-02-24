@@ -45,17 +45,17 @@ function makeHeatmap( div, json ) {
     var layout = {
         title: 'Salinity',
         margin: {
-          t: 200,
-          r: 200,
-          b: 200,
-          l: 200
+          t: 100,
+          r: 100,
+          b: 100,
+          l: 100
         },
         yaxis: axisTemplate,
         xaxis: Object.assign({}, axisTemplate, {title:'longitude'}),
 
         showlegend: false,
-        width: 800,
-        height: 800,
+        width: 600,
+        height: 600,
         autosize: false
     };
     
