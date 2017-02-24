@@ -4,7 +4,9 @@
 <h1 align="center">Ocean App<h1/>
 
 
-    <img align = "middle" src ="app/static/Test.png?" />
+<p align="center">
+    <img src ="app/static/Test.png?" />
+</p>
 ## Synopsis
 
 This is a project to create a client-side web app which displays oceanography data in time-lapse form. 
