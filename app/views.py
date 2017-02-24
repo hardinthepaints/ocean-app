@@ -10,11 +10,8 @@ import json
 
 
 '''
-Views are handlers that respond to request from clients. In Flask,
-handlers are written as python functions
+Views are handlers that respond to request from clients. Each methode with an '@' statement is a view.
 '''
-
-
 
 dataFN = 'app/static/ocean_his_0002.nc'
 
@@ -50,11 +47,20 @@ def numpyToArray( numpy ):
 #open a .nc file and collect data
 def getData():
     ds = nc.Dataset( dataFN )
+    
+    
+    salts = []
+    for i in range( len( ds.variables['salt'][0])):
+        salt = ds.variables['salt'][0, i, :, :].squeeze()
+        salt = numpyToArray(salt)
+        salts.append(salt)
+    
     salt = ds.variables['salt'][0, 0, :, :].squeeze()
     lonp = ds.variables['lon_psi'][:]
     latp = ds.variables['lat_psi'][:]
     
     output = {}
+    output['salts'] = salts
     output['salt'] = numpyToArray(salt)
     output['lonp'] = numpyToArray(lonp)
     output['latp'] = numpyToArray(latp)
