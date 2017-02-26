@@ -1,86 +1,8 @@
-/* Plotly axis style */
-const axisTemplate = {
-    autorange: true,
-    showgrid: true,
-    zeroline: false,
-    gridwidth: 2,
-    linecolor: 'black',
-    showticklabels: true,
-    ticks: '',
-    title: 'latitude'
-};
 
-const trans = {
-    transition: {
-        duration: 300,
-        easing: "quadratic-in-out"
-    },
-    frame: {duration: 1000, redraw: true},
-    mode:'next',
-};
-
-/* json data for the play and pause buttons */
-const updatemenus = [{
-    "x": 0.1,
-    "y": 0,
-    "yanchor": "top",
-    "xanchor": "center",
-    "showactive": false,
-    "direction": "right",
-    "type": "buttons",
-    "pad": {"t": 100, "r": 10},
-    "buttons": [{
-      "method": "animate",
-      "args": [null, {
-        "fromcurrent": true,
-        "transition": {
-          "duration": 300,
-          "easing": "quadratic-in-out"
-        },
-        "frame": {
-          "duration": 1000,
-          "redraw": false
-        }
-      }],
-      "label": "Play"
-    }, {
-      "method": "animate",
-      "args": [
-        [null],
-        {
-          "mode": "immediate",
-          "transition": {
-            "duration": 0
-          },
-          "frame": {
-            "duration": 0,
-            "redraw": false
-          }
-        }
-      ],
-      "label": "Pause"
-    }]
-}]
-    
-/* Layout of trace */
-const layout = {
-    title: 'Salinity',
-    margin: {
-      t: 100,
-      r: 100,
-      b: 100,
-      l: 100
-    },   
-    yaxis: axisTemplate,
-    xaxis: Object.assign({}, axisTemplate, {title:'longitude'}),
-
-    showlegend: false,
-    width: 600,
-    height: 600,
-    autosize: false,
-    
-};
-
+/* Load the formats */
+var imported = document.createElement('script');
+imported.src = 'myheatmap.formats.js';
+document.head.appendChild(imported);
 
 
 /* Render a plotly heatmap with one frame of data */
@@ -88,29 +10,92 @@ function heatmap( div, json ) {
     
     var parsedJSON = parseJSON( json );
     
+    
+    
     /* Initial data Data */
-    var data = [
+    var trace = [
         {
             z: parsedJSON.salts[0],
             x: parsedJSON.lonp,
             y: parsedJSON.latp,
             
             type: 'heatmap',
+            text: Array(parsedJSON.salts[0].length).fill("Rendered with plotly"),
             colorscale: 'Jet',
-            reversescale: false,            
+            opacity: 1,
+            reversescale: false,
+            name:'trace0' 
         }
     ];
     
 
     /* Plot and animate the data */
-    Plotly.plot(div, data, layout,  {scrollZoom: true});
+    Plotly.plot(div, trace, layout,  {scrollZoom: true});
+
+    
+    
     
     return parsedJSON.salts;
     
 }
 
+
+function flipTraces(){
+    console.log("flip traces")
+    
+    var update = {
+        visible: [false, true]
+    };
+    
+    Plotly.moveTraces( "myTraces", 0);
+    
+
+    
+    Plotly.restyle("myTraces", update, [0, 1])
+
+}
+
+/* Checks whether HTML5 Web Workers are supported in this browser */
+function workerSupported(){
+    if (typeof(Worker) !== "undefined") {
+        //worker is supported!
+        return true;
+    } else {
+        //worker not supported
+        return false;
+    }
+    
+}
+
+
+function addTrace( i, parsedJSON ){
+    
+    var newData = [{
+        x: parsedJSON.lonp,
+        y: parsedJSON.latp,
+        z:parsedJSON.salts[30],
+        
+        type: 'heatmap',
+        text: Array(parsedJSON.salts[0].length).fill("trace1"),
+        colorscale: 'Jet',
+        opacity: 1,
+        reversescale: false,
+        name:'trace1',
+        visible:true
+    }];
+    
+    newData[0].z = parsedJSON.salts[i];
+
+    Plotly.addTraces("myTraces", newData, 0)
+    i = i +1;
+    
+    if (i < 39) {
+        setTimeout( addTrace( i, parsedJSON ),500);
+    }
+}
+
 /* Render plotly heatmap and animate multiple frames of data */
-function animatedHeatmap( div, json ) {
+function animateHeatmap( div, json ) {
 
     /* Plot and animate the data */
     var salts = heatmap( div, json )
@@ -127,12 +112,7 @@ function animatedHeatmap( div, json ) {
     var _sliders = [{
         pad: {t: 30},
         currentvalue: {
-            xanchor: 'right',
-            prefix: 'frame: ',
-            font: {
-            color: '#888',
-            size: 20
-            }
+            xanchor: 'right', prefix: 'frame: ',font: {color: '#888',size: 20}
         },
     }];
     
@@ -146,6 +126,7 @@ function animatedHeatmap( div, json ) {
             name: "" + i,
             data: [{
                 z: salts[i],
+                text: Array(salts[i].length).fill("Plotly animate()"),
             }],
             traces: [0],
             layout:{
@@ -166,8 +147,8 @@ function animatedHeatmap( div, json ) {
             
         })
         
+        
     }
-    
     
     _sliders[0].steps = _steps;
     
@@ -177,8 +158,8 @@ function animatedHeatmap( div, json ) {
     /* Add and animate frames */
     Plotly.addFrames( div, frames );
 
-    /* Begin with the first frame */
-    //Plotly.animate( div, null, trans );
+    /* Begin with initial animation */
+    Plotly.animate(div, null, updatemenus[0]['buttons'][0]['args'][1]);
     
 }
 
@@ -210,7 +191,11 @@ function parseJSON( json ){
     
 }
 
-/* Trim the data to fit in the heatmap */
+/* Trim the data to fit in the heatmap
+Makes a 2d array 1 less in each of its dimensions
+so if the input is an array 2x4, then the output is a 1X3,
+with the last row/column sliced off
+*/
 function trimData( data ){
     
     /* Display the data */            
@@ -229,6 +214,7 @@ function trimData( data ){
     /* 'flatten' a 2d array into a 1d */
     return [].concat.apply([], data);
 }
+
 
 
     
