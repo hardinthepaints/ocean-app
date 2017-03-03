@@ -1,7 +1,9 @@
+/* A group of functions to create a plotly heatmap from oceanography data */
+
 
 /* Load the formats */
 var imported = document.createElement('script');
-imported.src = 'myheatmap.formats.js';
+imported.src = 'myplotly.formats.js';
 document.head.appendChild(imported);
 
 
@@ -37,61 +39,6 @@ function heatmap( div, json ) {
     
     return parsedJSON.salts;
     
-}
-
-
-function flipTraces(){
-    console.log("flip traces")
-    
-    var update = {
-        visible: [false, true]
-    };
-    
-    Plotly.moveTraces( "myTraces", 0);
-    
-
-    
-    Plotly.restyle("myTraces", update, [0, 1])
-
-}
-
-/* Checks whether HTML5 Web Workers are supported in this browser */
-function workerSupported(){
-    if (typeof(Worker) !== "undefined") {
-        //worker is supported!
-        return true;
-    } else {
-        //worker not supported
-        return false;
-    }
-    
-}
-
-
-function addTrace( i, parsedJSON ){
-    
-    var newData = [{
-        x: parsedJSON.lonp,
-        y: parsedJSON.latp,
-        z:parsedJSON.salts[30],
-        
-        type: 'heatmap',
-        text: Array(parsedJSON.salts[0].length).fill("trace1"),
-        colorscale: 'Jet',
-        opacity: 1,
-        reversescale: false,
-        name:'trace1',
-        visible:true
-    }];
-    
-    newData[0].z = parsedJSON.salts[i];
-
-    Plotly.addTraces("myTraces", newData, 0)
-    i = i +1;
-    
-    if (i < 39) {
-        setTimeout( addTrace( i, parsedJSON ),500);
-    }
 }
 
 /* Render plotly heatmap and animate multiple frames of data */

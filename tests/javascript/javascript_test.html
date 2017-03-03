@@ -3,6 +3,7 @@
 <!-- An html page to test the server by querying for and displaying the data.
     To run:
         Run the server.
+            In terminal or command line, type in 'python3 run.py' and hit enter
         Open this file in browser.
         The raw data should appear after a moment.
 -->
@@ -18,10 +19,8 @@
     <script src="plotly-latest.min.js"></script>
     
     <!-- code which makes the plotly heatmap -->
-    <script src="myheatmap.js"></script>
+    <script src="myplotly.js"></script>
     
-    <script src="gif-master/dist/gif.js"></script>
-
 
 </head>
 <body>
@@ -31,11 +30,6 @@
     <p id="status">html loaded</p>
     
     <div id="myDiv" ></div>
-    
-    <div id="myTraces" ></div>
-    
-    <button onclick="flipTraces()">Click me</button> 
-
                 
     <script>
         
@@ -80,7 +74,7 @@
         
         /* request multiple layers to render an animation*/    
  
-        document.getElementById("status").innerHTML = 'Awaiting response from ' + _url;
+        document.getElementById("status").innerHTML = 'Awaiting response from ' + _url + '. Make sure the server is running.';
 
     
     </script>
