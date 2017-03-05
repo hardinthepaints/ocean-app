@@ -29,7 +29,9 @@ function heatmap( div, json ) {
             reversescale: false,
             name:'trace0' 
         }
-    ];   
+    ];
+    
+    layout.width = json.ratio * layout.height;
 
     /* Plot and animate the data */
     Plotly.plot(div, trace, layout,  {scrollZoom: false, staticPlot:true, displayModeBar: false, showLink:false});
@@ -84,8 +86,8 @@ function animateHeatmap( div, json ) {
                 mode: "immediate",
                 transition: {"duration": 0},
                 frame: {"duration": 0, "relayout": true, "redraw": false}
-            },
-        ]
+                },
+            ]
             
         })
         
@@ -101,7 +103,7 @@ function animateHeatmap( div, json ) {
     Plotly.addFrames( div, frames );
 
     /* Begin with initial animation */
-    Plotly.animate(div, null, updatemenus[0]['buttons'][0]['args'][1]);
+    //Plotly.animate(div, null, updatemenus[0]['buttons'][0]['args'][1]);
     
 }
 

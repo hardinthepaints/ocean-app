@@ -22,11 +22,7 @@
 </head>
 <body>
     
-    <h1>Rendering with Plotly.js</h1>
-    
-    <p id="status">html loaded</p>
-    
-    <div id="myDiv" ></div>
+    <div id="myDiv" align="center" ></div>
                 
     <script>
         
@@ -34,8 +30,7 @@
         
         //callback function with the object resulting from the json data
         function processJSON(json){
-            document.getElementById("status").innerHTML = 'Received data!';
-            
+                        
             console.log("received json object: " + json);
             
             if ( json.salts.length > 1) {
@@ -50,9 +45,7 @@
             
         }
         
-        function makeAJAX( _layers ) {
-            document.getElementById("status").innerHTML = 'Making ajax request...';
-        
+        function makeAJAX( _layers ) {        
             /* 'JSON Padded' Cross-origin Ajax request to the server */
             $.ajax({
                 url: _url,
@@ -67,9 +60,6 @@
         /* Request a single layer to render a frame */
         makeAJAX( 40 );
 
-        
-        /* request multiple layers to render an animation*/    
-        document.getElementById("status").innerHTML = 'Awaiting response from ' + _url + '. Make sure the server is running.';
 
     
     </script>

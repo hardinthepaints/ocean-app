@@ -50,6 +50,21 @@ def gleanUniqueValues( arr ):
 #flatten a 2 dimensional numpy array
 def flatten( numpy ):
     return numpy.reshape( -1 )
+
+def getMin( target ):
+    return min( val for val in target)
+
+def getMax( target ):
+    return max( val for val in target)
+
+#given two arrays of values representing x and y values for a graph,
+#determine the ration of the x axis to the y axis
+def getRatio( xvals, yvals ):
+    xlength = getMax(xvals) - getMin(xvals)
+    ylength = getMax(yvals) - getMin(yvals)
+    return float(xlength) / float(ylength)
+ 
+
     
 
 #open a .nc file and collect data
@@ -69,10 +84,11 @@ def getData( layers = 1 ):
     
     salt = ds.variables['salt'][0, 0, :, :].squeeze()
     
-
+    #longitude - east and west
     lonp = ds.variables['lon_psi'][:]
     lonp = flatten( lonp )
     
+    #latitude - north or south
     latp = ds.variables['lat_psi'][:]
     latp = flatten(latp)
     
@@ -81,6 +97,7 @@ def getData( layers = 1 ):
     output['salt'] = salt.tolist()
     output[ 'latp' ] = gleanUniqueValues( latp.tolist() )
     output[ 'lonp' ] = gleanUniqueValues( lonp.tolist() )
+    output['ratio'] = getRatio( lonp, latp )
 
     
     return output

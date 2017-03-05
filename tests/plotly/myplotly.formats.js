@@ -68,12 +68,8 @@ const layout = {
     xaxis: Object.assign({}, axisTemplate, {title:'longitude'}),
 
     showlegend: false,
-    width: 600,
-    height: 600,
+    width: 700,
+    height: 700,
     autosize: false,
     dragmode: "select",
-    
-
-  
-    
 };
