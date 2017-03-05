@@ -1,6 +1,7 @@
 tests/javascript/gapminder-with-frames.json
 tests/javascript/gif-master/
 tests/webgl-heatmap/
+tests/plotly/trash.js
 
 # Compiled source #
 ###################

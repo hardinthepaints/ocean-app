@@ -1,6 +1,7 @@
 /* Plotly axis style */
 const axisTemplate = {
     autorange: true,
+    type:"linear",
     showgrid: true,
     zeroline: false,
     gridwidth: 2,

@@ -14,24 +14,40 @@ function importScript( filename ){
     
 }
 
+
+
+
 /* Render a plotly heatmap with one frame of data */
 function heatmap( div, json ) {
-        
+    
+    console.log( json.lonp );
+    
     /* Initial data Data */
     var trace = [
         {
             z: json.salts[0],
-            x: json.lonp,
-            y: json.latp,            
+            /* x: json.lonp,
+            y: json.latp, */
+            
+            /* xtype:"scaled",
+            ytype:"scaled", */
             type: 'heatmapgl',
             colorscale: 'Jet',
             opacity: 1,
             reversescale: false,
-            name:'trace0' 
+            name:'trace0',
+            connectgaps: false,
+            zsmooth:"fast",
         }
     ];
     
     layout.width = json.ratio * layout.height;
+    layout.margin = {
+            t: 100,
+            r: 100 * json.ratio,
+            b: 100,
+            l: 100 * json.ratio,
+        }
 
     /* Plot and animate the data */
     Plotly.plot(div, trace, layout,  {scrollZoom: false, staticPlot:false, displayModeBar: false, showLink:false});
@@ -73,6 +89,7 @@ function animateHeatmap( div, json ) {
             name: "" + i,
             data: [{
                 z: salts[i],
+
                 text: Array(salts[i].length).fill("Plotly animate()"),
             }],
             traces: [0],
