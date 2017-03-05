@@ -18,9 +18,7 @@ dataFN = 'app/static/ocean_his_0002.nc'
 #serve the data in json
 @app.route('/')
 @app.route('/index')
-def index():
-    
-    
+def index(): 
     
     output = getData()
        
@@ -36,20 +34,27 @@ def jsonp():
     callback = request.args.get('callback')
        
     return Response( callback + "(" + json.dumps(output) + ")", mimetype='application/json')
-    
 
-#convert a 2 dimensional numpy array to a python array
-#empties are converted to null
-def numpyToArray( numpy ):
-    rows = len( numpy[0] )
-    columns =  len( numpy )
-    numpy = numpy.reshape( columns, rows )
+#glean the unique values in order from many repeating values
+def gleanUniqueValues( arr ):
+    dic = {}
+    out = []
+    for v in arr:
+        if v in dic:
+            pass
+        else:
+            dic[v] = True
+            out.append( v )
+    return out
+
+#flatten a 2 dimensional numpy array
+def flatten( numpy ):
+    return numpy.reshape( -1 )
     
-    return numpy.tolist()
 
 #open a .nc file and collect data
 #Return the specified number of layers
-def getData( layers = 0 ):
+def getData( layers = 1 ):
     ds = nc.Dataset( dataFN )
     
     #ensure the layers correspond to correct indexes
@@ -59,18 +64,24 @@ def getData( layers = 0 ):
     salts = []
     for i in range( layers ):
         salt = ds.variables['salt'][0, i, :, :].squeeze()
-        salt = numpyToArray(salt)
+        salt = salt.tolist()
         salts.append(salt)
     
     salt = ds.variables['salt'][0, 0, :, :].squeeze()
+    
+
     lonp = ds.variables['lon_psi'][:]
+    lonp = flatten( lonp )
+    
     latp = ds.variables['lat_psi'][:]
+    latp = flatten(latp)
     
     output = {}
     output['salts'] = salts
-    output['salt'] = numpyToArray(salt)
-    output['lonp'] = numpyToArray(lonp)
-    output['latp'] = numpyToArray(latp)
+    output['salt'] = salt.tolist()
+    output[ 'latp' ] = gleanUniqueValues( latp.tolist() )
+    output[ 'lonp' ] = gleanUniqueValues( lonp.tolist() )
+
     
     return output
     

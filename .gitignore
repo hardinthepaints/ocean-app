@@ -1,6 +1,6 @@
 tests/javascript/gapminder-with-frames.json
 tests/javascript/gif-master/
-
+tests/webgl-heatmap/
 
 # Compiled source #
 ###################

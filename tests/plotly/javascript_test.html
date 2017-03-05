@@ -12,14 +12,11 @@
 <head>
     <title>Javascript Test</title>
     
-    <!-- jquery -->
+    <!-- jquery to make ajax request -->
     <script src="jquery-3.1.1.min.js"></script>
-     
-    <!-- plotly -->
-    <script src="plotly-latest.min.js"></script>
     
-    <!-- code which makes the plotly heatmap -->
-    <script src="myplotly.js"></script>
+    <!-- plotly.js wrapper class -->
+    <script src = "myplotly.js"></script>
     
 
 </head>
@@ -68,12 +65,10 @@
         }
         
         /* Request a single layer to render a frame */
-        makeAJAX( 1 );
         makeAJAX( 40 );
 
         
         /* request multiple layers to render an animation*/    
- 
         document.getElementById("status").innerHTML = 'Awaiting response from ' + _url + '. Make sure the server is running.';
 
     

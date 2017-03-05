@@ -7,7 +7,8 @@ const axisTemplate = {
     linecolor: 'black',
     showticklabels: true,
     ticks: '',
-    title: 'latitude'
+    title: 'latitude',
+    fixedrange:true,
 };
 
 /* json data for the play and pause buttons */
@@ -27,12 +28,11 @@ const updatemenus = [{
       "args": [null, {
         "fromcurrent": true,
         "transition": {
-          "duration": 400,
-          "easing": "quadratic-in-out"
+          "duration": 30,
         },
         "frame": {
-          "duration": 100,
-          "redraw": true,
+          "duration": 0,
+          "redraw":true,
         }
       }],
       "label": "Play"
@@ -71,6 +71,7 @@ const layout = {
     width: 600,
     height: 600,
     autosize: false,
+    dragmode: "select",
     
 
   
