@@ -34,7 +34,7 @@ function heatmap( div, json ) {
     layout.width = json.ratio * layout.height;
 
     /* Plot and animate the data */
-    Plotly.plot(div, trace, layout,  {scrollZoom: false, staticPlot:true, displayModeBar: false, showLink:false});
+    Plotly.plot(div, trace, layout,  {scrollZoom: false, staticPlot:false, displayModeBar: false, showLink:false});
     
     return json.salts;
 
@@ -79,19 +79,20 @@ function animateHeatmap( div, json ) {
         });
         
         //make a new step for the slider
-        _steps.push( {
+        
+        var step = {
             label : '' + i,
             method: 'animate',
             args: [["" + i], {
-                mode: "immediate",
-                transition: {"duration": 0},
-                frame: {"duration": 0, "relayout": true, "redraw": false}
+                mode: "next",
+                transition: {"duration": 30},
+                frame: {"duration": 30, "redraw": false}
                 },
             ]
             
-        })
+        }
         
-        
+        _steps.push( step )
     }
     
     _sliders[0].steps = _steps;
@@ -103,7 +104,7 @@ function animateHeatmap( div, json ) {
     Plotly.addFrames( div, frames );
 
     /* Begin with initial animation */
-    //Plotly.animate(div, null, updatemenus[0]['buttons'][0]['args'][1]);
+    Plotly.animate(div, null, updatemenus[0]['buttons'][0]['args'][1]);
     
 }
 

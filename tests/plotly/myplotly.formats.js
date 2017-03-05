@@ -27,12 +27,15 @@ const updatemenus = [{
       "method": "animate",
       "args": [null, {
         "fromcurrent": true,
+        "mode": "immediate",
         "transition": {
           "duration": 30,
         },
         "frame": {
-          "duration": 0,
-          "redraw":true,
+          "duration": 30,
+          "redraw":false,
+          "relayout":false,
+          
         }
       }],
       "label": "Play"

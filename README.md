@@ -1,7 +1,7 @@
 <h1 align="center">Ocean App<h1/>
 
 <p align="center">
-    <img src ="app/static/Test.png?" />
+    <img src ="app/static/slider_demo.gif?" />
 </p>
 
 ## Synopsis
