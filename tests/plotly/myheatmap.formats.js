@@ -1,6 +1,6 @@
 /* Plotly axis style */
 const axisTemplate = {
-    autorange: true,
+    autorange: true,    
     type:"linear",
     showgrid: true,
     zeroline: false,
@@ -10,6 +10,8 @@ const axisTemplate = {
     ticks: '',
     title: 'latitude',
     fixedrange:true,
+    visible:false,
+    showlengend:false,
 };
 
 /* json data for the play and pause buttons */
@@ -68,8 +70,8 @@ const layout = {
       b: 100,
       l: 100
     },   
-    yaxis: axisTemplate,
-    xaxis: Object.assign({}, axisTemplate, {title:'longitude'}),
+    /* yaxis: axisTemplate,
+    xaxis: Object.assign({}, axisTemplate, {title:'longitude'}), */
 
     showlegend: false,
     width: 700,

@@ -18,6 +18,8 @@
     <!-- plotly.js wrapper class -->
     <script src = "myplotly.js"></script>
     
+    <script src = "myheatmap.js"></script>
+    
 
 </head>
 <body>
@@ -33,15 +35,7 @@
                         
             console.log("received json object: " + json);
             
-            if ( json.salts.length > 1) {
-                console.log("rendering multiple frames...")
-                animateHeatmap( "myDiv", json);
-                //animateTraces("myTraces", json);
-            } else {
-                console.log("rendering single frame...")
-                heatmap( "myDiv", json);
-                
-            }
+            var hm = new MyHeatmap( "myDiv", json );
             
         }
         
@@ -59,6 +53,8 @@
         
         /* Request a single layer to render a frame */
         makeAJAX( 40 );
+        
+        
 
 
     

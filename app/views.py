@@ -2,9 +2,7 @@
 
 import netCDF4 as nc
 from app import app
-from flask import send_from_directory
-from flask import Response
-from flask import request
+from flask import send_from_directory, Response, request
 import os
 import json
 
@@ -15,6 +13,8 @@ Views are handlers that respond to request from clients. Each methode with an '@
 
 dataFN = 'app/static/ocean_his_0002.nc'
 
+
+
 #serve the data in json
 @app.route('/')
 @app.route('/index')
@@ -23,6 +23,8 @@ def index():
     output = getData()
        
     return Response(json.dumps(output), mimetype='application/json')
+
+
 
 #serve data in jsonp with provided callback
 @app.route('/jsonp')
@@ -34,6 +36,15 @@ def jsonp():
     callback = request.args.get('callback')
        
     return Response( callback + "(" + json.dumps(output) + ")", mimetype='application/json')
+
+#serve test files
+@app.route('/tests/plotly/<path:path>')
+def send_js(path):
+    directory = 'tests/plotly/'
+    return send_from_directory( directory, path)
+
+    
+    
 
 #glean the unique values in order from many repeating values
 def gleanUniqueValues( arr ):
