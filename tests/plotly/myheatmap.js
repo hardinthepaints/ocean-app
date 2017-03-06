@@ -1,6 +1,6 @@
 /* A wrapper class for the Plotly chart 'heatmapgl'.
 Based off of the animation examples from the plotly.js websites
-Requests data from a server and adds to graph
+Requests data from a server and adds to a plotly heatmap graph
 */
 
 
@@ -15,7 +15,6 @@ function importScript( filename ){
 /* Load the formats */
 importScript( 'myheatmap.formats.js' );
 importScript( "plotly-latest.min.js" );
-//importScript( "jquery-3.1.1.min.js" );
 
 class MyHeatmap{
     
@@ -25,11 +24,14 @@ class MyHeatmap{
         
         /* The id of the div which will contain the heatmap */
         this.div = _div;
+        
+        /* The url to get the data */
         this.url = _url;
         
         this.downloadData( 1 );
     }
     
+    /* Download the data */
     downloadData( layers, callback = "hm.renderHeatmap" ){
         
         /* make asynchronous call */
@@ -43,16 +45,14 @@ class MyHeatmap{
         
     }
     
+    /* Render a heatmapgl plotly chart */
     renderHeatmap( json ){
         /* Initial data Data */
         var trace = [
             {
                 z: json.salts[0],
-                 /* x: json.lonp,
+                /* x: json.lonp,
                 y: json.latp, */
-                
-                /* xtype:"scaled",
-                ytype:"scaled", */
                 hoverinfo:"z+text",            
                 type: 'heatmapgl',
                 colorscale: 'Jet',
@@ -84,7 +84,6 @@ class MyHeatmap{
         }
         
         this.bindEventListeners();
-        this.play();
     }
     
     /* Bind plotly event listeners*/
@@ -128,12 +127,14 @@ class MyHeatmap{
         });
     }
     
+    /* Play through the frames */
     play(){
         
         /* Begin with initial animation */
         Plotly.animate(this.div, null, updatemenus[0]['buttons'][0]['args'][1]);
     }
     
+    /* Add frames to the plot and animate */
     addFrames( json ){
         var salts = json.salts;
         
@@ -173,9 +174,6 @@ class MyHeatmap{
                     frame: {"duration": 30, "redraw": false}
                     },
                 ]
-                /* method:'playFrame',
-                args : [i] */
-                
             }
             
             _steps.push( step )
@@ -187,7 +185,8 @@ class MyHeatmap{
         Plotly.relayout( this.div, {sliders:_sliders, updatemenus : updatemenus})
         
         /* Add and animate frames */
-        Plotly.addFrames( this.div, frames );       
+        Plotly.addFrames( this.div, frames );
+        this.play();
     }
     
     

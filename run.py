@@ -4,8 +4,8 @@ from app import app
 
 #import the app variable from our app package
 #invoke its run method to start server
-app.run( debug=True )
-#app.run( debug=False )
+#app.run( debug=True )
+app.run( debug=False )
 
 
 

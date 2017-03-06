@@ -73,10 +73,7 @@ def getMax( target ):
 def getRatio( xvals, yvals ):
     xlength = getMax(xvals) - getMin(xvals)
     ylength = getMax(yvals) - getMin(yvals)
-    return float(xlength) / float(ylength)
- 
-
-    
+    return float(xlength) / float(ylength)  
 
 #open a .nc file and collect data
 #Return the specified number of layers
