@@ -1,5 +1,7 @@
 /* A wrapper class for the Plotly chart 'heatmapgl'.
-Based off of the animation examples from the plotly.js websites */
+Based off of the animation examples from the plotly.js websites
+Requests data from a server and adds to graph
+*/
 
 
 /* import a script with the given filename*/
@@ -10,20 +12,38 @@ function importScript( filename ){
     
 }
 
+/* Load the formats */
+importScript( 'myheatmap.formats.js' );
+importScript( "plotly-latest.min.js" );
+//importScript( "jquery-3.1.1.min.js" );
+
 class MyHeatmap{
     
-    constructor( div, json ){
+    constructor( _div, _url ){
         
-        /* Load the formats */
-        importScript( 'myplotly.formats.js' );
-        importScript( "plotly-latest.min.js" );
+
         
-        this.div = div;
+        /* The id of the div which will contain the heatmap */
+        this.div = _div;
+        this.url = _url;
         
-        this.renderHeatmap( div, json );     
+        this.downloadData( 1 );
     }
     
-    renderHeatmap( div, json ){
+    downloadData( layers, callback = "hm.renderHeatmap" ){
+        
+        /* make asynchronous call */
+        /* 'JSON Padded' Cross-origin Ajax request to the server */
+        $.ajax({
+            url: this.url,
+            dataType: "jsonp",
+            data: { layers: layers},
+            jsonpCallback: callback,
+        });
+        
+    }
+    
+    renderHeatmap( json ){
         /* Initial data Data */
         var trace = [
             {
@@ -53,13 +73,59 @@ class MyHeatmap{
             }
     
         /* Plot and animate the data */
-        Plotly.plot(div, trace, layout,  {scrollZoom: false, staticPlot:false, displayModeBar: false, showLink:false});
-        
+        Plotly.plot(this.div, trace, layout,  {scrollZoom: false, staticPlot:false, displayModeBar: false, showLink:false});
+
         if ( json.salts.length > 1) {
-            this.addFrames( json.salts );
-            this.play()
-            
+
+            this.addFrames( json );
+        } else {
+            /* download the rest of the data */
+            this.downloadData( 40, "hm.addFrames" );
         }
+        
+        this.bindEventListeners();
+        this.play();
+    }
+    
+    /* Bind plotly event listeners*/
+    bindEventListeners(){
+        
+        function stringify( obj ){
+            var props = "{"
+            if (obj !== null) { 
+                for (var propertyname in obj) {
+                    props = props + propertyname + ", ";
+                }
+            }
+
+            return props + "}"         
+        }
+        
+        var myPlot = document.getElementById( this.div )
+        var plotData = myPlot.data;
+        console.log( stringify( myPlot.data ) );
+        
+        myPlot.on('plotly_restyle', function(){
+            console.log("restyle");
+        });
+        
+        myPlot.on('plotly_relayout', function(data){
+            console.log("relayout traces:" );
+        });
+        
+        /* No data provided */
+        myPlot.on('plotly_animated', function(  data ){           
+            console.log("animated " + stringify( plotData ));
+            
+        });
+        
+        myPlot.on('plotly_redraw', function(){
+            console.log("redraw");
+        });
+        
+        myPlot.on('plotly_afterplot', function(){
+            console.log("afterplot");
+        });
     }
     
     play(){
@@ -68,7 +134,8 @@ class MyHeatmap{
         Plotly.animate(this.div, null, updatemenus[0]['buttons'][0]['args'][1]);
     }
     
-    addFrames( salts ){
+    addFrames( json ){
+        var salts = json.salts;
         
         frames = [];
     
@@ -106,6 +173,8 @@ class MyHeatmap{
                     frame: {"duration": 30, "redraw": false}
                     },
                 ]
+                /* method:'playFrame',
+                args : [i] */
                 
             }
             
@@ -118,8 +187,7 @@ class MyHeatmap{
         Plotly.relayout( this.div, {sliders:_sliders, updatemenus : updatemenus})
         
         /* Add and animate frames */
-        Plotly.addFrames( this.div, frames );
-            
+        Plotly.addFrames( this.div, frames );       
     }
     
     

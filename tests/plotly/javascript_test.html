@@ -13,10 +13,7 @@
     <title>Javascript Test</title>
     
     <!-- jquery to make ajax request -->
-    <script src="jquery-3.1.1.min.js"></script>
-    
-    <!-- plotly.js wrapper class -->
-    <script src = "myplotly.js"></script>
+    <script src="jquery-3.1.1.min.js"></script> 
     
     <script src = "myheatmap.js"></script>
     
@@ -30,33 +27,7 @@
         
         const _url = "http://localhost:5000/jsonp"
         
-        //callback function with the object resulting from the json data
-        function processJSON(json){
-                        
-            console.log("received json object: " + json);
-            
-            var hm = new MyHeatmap( "myDiv", json );
-            
-        }
-        
-        function makeAJAX( _layers ) {        
-            /* 'JSON Padded' Cross-origin Ajax request to the server */
-            $.ajax({
-                url: _url,
-                dataType: "jsonp",
-                data: { layers: _layers},
-                jsonpCallback: "processJSON",
-            });
-            
-            
-        }
-        
-        /* Request a single layer to render a frame */
-        makeAJAX( 40 );
-        
-        
-
-
+        var hm = new MyHeatmap("myDiv", _url)
     
     </script>
 
