@@ -19,9 +19,9 @@ This is a project to create a client-side web app which displays oceanography da
 1. Start the flask server: `python3 run.py` in the root directory. `python3 run.py -d` to run in debug mode.
 2. To run from command line in debug mode:
 
-... `$ export FLASK_APP=run.py`  
-... `$ export FLASK_DEBUG=1`  
-... `$ flask run`  
+    `$ export FLASK_APP=run.py`  
+    `$ export FLASK_DEBUG=1`  
+    `$ flask run`  
 3. Open tests/plotly/javascript_test.html in a browser. Or, go to http://localhost:5000/tests/plotly/javascript_test.html
 4. According to [Plotly benchmarks](https://plot.ly/benchmarks/ "this"), Chrome is the fastest browser for rendering heatmaps.
 
