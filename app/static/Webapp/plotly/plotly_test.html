@@ -12,8 +12,12 @@
 <head>
     <title>Javascript Test</title>
     
-    <!-- jquery to make ajax request -->
-    <script src="jquery-3.1.1.min.js"></script> 
+    <script src="myajax.js"></script>
+    
+    <script src="plotly-latest.min.js"></script>
+    
+    <script src="myheatmap.formats.js"></script>
+
     
     <script src = "myheatmap.js"></script>
     
@@ -25,9 +29,14 @@
                 
     <script>
         
-        const _url = "http://localhost:5000/jsonp"
+        const url = "http://localhost:5000/jsonp"
         
-        var hm = new MyHeatmap("myDiv", _url)
+        var hm = new MyHeatmap("myDiv", 600)
+        
+        /* initially download data and plot */
+        downloadData( url, {callback:"hm.initHeatmap", first:true })
+        
+        downloadData( url, {callback:"hm.addFrames", start:0, end:40})
     
     </script>
 

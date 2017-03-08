@@ -5,6 +5,8 @@ from app import app
 from flask import send_from_directory, Response, request
 import os
 import json
+from time import sleep
+from math import sqrt
 
 
 '''
@@ -30,21 +32,37 @@ def index():
 @app.route('/jsonp')
 def jsonp():
        
-    layers = int( request.args.get('layers', 1) )
-    output = getData( layers )
+    #the frame after the last frame in the range returned (will NOT return this one)
+    end = int( request.args.get('end', 1) )
     
+    #the first frame in the range to return
+    start = int(request.args.get('start', 0) )
+    
+    #whether or not this is the first call to the server
+    first = bool(request.args.get('first', False) )
+
+    output = getData( end=end, start=start, first=first )
+    
+    #the jsonp callback 
     callback = request.args.get('callback')
+
        
     return Response( callback + "(" + json.dumps(output) + ")", mimetype='application/json')
 
-#serve test files
-@app.route('/tests/plotly/<path:path>')
-def send_js(path):
-    directory = 'tests/plotly/'
-    return send_from_directory( directory, path)
+@app.route('/stream_sqrt')
+def stream():
+    def generate():
+        for i in range(500):
+            yield '{}\n'.format( sqrt(i) )
+            sleep(.05)
 
-    
-    
+    return app.response_class(generate(), mimetype='text/plain')
+
+#serve test files
+@app.route('/tests/<path:path>')
+def send_js(path):
+    directory = 'tests/'
+    return send_from_directory( directory, path)
 
 #glean the unique values in order from many repeating values
 def gleanUniqueValues( arr ):
@@ -77,38 +95,52 @@ def getRatio( xvals, yvals ):
 
 #open a .nc file and collect data
 #Return the specified number of layers
-def getData( layers = 1 ):
+def getData( end, start, first ):
     ds = nc.Dataset( dataFN )
     
+    output = {}
+
     #ensure the layers correspond to correct indexes
-    layers = min( layers, len( ds.variables['salt'][0]) )
-    layers = max( layers, 1 )
-    
-    salts = []
-    for i in range( layers ):
+    end = min( end, len( ds.variables['salt'][0]) )
+    end = max( end, 1 )
+     
+    #salts = [None] * end
+    salts = {}
+    for i in range( start, end ):
         salt = ds.variables['salt'][0, i, :, :].squeeze()
         salt = salt.tolist()
-        salts.append(salt)
+        salts[i] = salt
+        
     
     salt = ds.variables['salt'][0, 0, :, :].squeeze()
     
-    #longitude - east and west
-    lonp = ds.variables['lon_psi'][:]
-    lonp = flatten( lonp )
+    #if the first call by the client
+    if ( first ):
+        #longitude - east and west
+        lonp = ds.variables['lon_psi'][:]
+        lonp = flatten( lonp )
+        output[ 'lonp' ] = gleanUniqueValues( lonp.tolist() )
+
+        #latitude - north or south
+        latp = ds.variables['lat_psi'][:]
+        latp = flatten(latp)
+        output[ 'latp' ] = gleanUniqueValues( latp.tolist() )
+        
+        #include the ratio of lon to lat
+        output['ratio'] = getRatio( lonp, latp )
+        
+        #include the number of frames available
+        output['frames'] = len( ds.variables['salt'][0, :, :, :].squeeze() )
+
+
     
-    #latitude - north or south
-    latp = ds.variables['lat_psi'][:]
-    latp = flatten(latp)
+    output['frames'] = salts
     
-    output = {}
-    output['salts'] = salts
-    output['salt'] = salt.tolist()
-    output[ 'latp' ] = gleanUniqueValues( latp.tolist() )
-    output[ 'lonp' ] = gleanUniqueValues( lonp.tolist() )
-    output['ratio'] = getRatio( lonp, latp )
 
     
     return output
+
+
     
 
 

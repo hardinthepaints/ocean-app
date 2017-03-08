@@ -4,53 +4,40 @@ Requests data from a server and adds to a plotly heatmap graph
 */
 
 
-/* import a script with the given filename*/
-function importScript( filename ){
-    var imported = document.createElement('script');
-    imported.src = filename;
-    document.head.appendChild(imported);
-    
-}
 
-/* Load the formats */
-importScript( 'myheatmap.formats.js' );
-importScript( "plotly-latest.min.js" );
+
+
 
 class MyHeatmap{
     
-    constructor( _div, _url ){
+    constructor( div, height ){
         
-
-        
+        /* define sliders */    
+        this.sliders = [{
+            pad: {t: 30},
+            currentvalue: {
+                xanchor: 'right', prefix: 'frame: ',font: {color: '#888',size: 20}
+            },
+            
+        }];
+    
         /* The id of the div which will contain the heatmap */
-        this.div = _div;
+        this.div = div;
         
-        /* The url to get the data */
-        this.url = _url;
-        
-        this.downloadData( 1 );
-    }
-    
-    /* Download the data */
-    downloadData( layers, callback = "hm.renderHeatmap" ){
-        
-        /* make asynchronous call */
-        /* 'JSON Padded' Cross-origin Ajax request to the server */
-        $.ajax({
-            url: this.url,
-            dataType: "jsonp",
-            data: { layers: layers},
-            jsonpCallback: callback,
-        });
+        /* set the height */
+        layout.height = height;
         
     }
     
-    /* Render a heatmapgl plotly chart */
-    renderHeatmap( json ){
+    /* Initially plot the map with one frame of data */
+    initHeatmap( json ){
+        
+        var z = json.frames[0];
+        
         /* Initial data Data */
         var trace = [
             {
-                z: json.salts[0],
+                z: z,
                 /* x: json.lonp,
                 y: json.latp, */
                 hoverinfo:"z+text",            
@@ -64,28 +51,23 @@ class MyHeatmap{
             }
         ];
         
+        /* set the width */
         layout.width = json.ratio * layout.height;
         layout.margin = {
                 t: 100,
                 r: 100 * json.ratio,
                 b: 100,
                 l: 100 * json.ratio,
-            }
-    
-        /* Plot and animate the data */
-        Plotly.plot(this.div, trace, layout,  {scrollZoom: false, staticPlot:false, displayModeBar: false, showLink:false});
-
-        if ( json.salts.length > 1) {
-
-            this.addFrames( json );
-        } else {
-            /* download the rest of the data */
-            this.downloadData( 40, "hm.addFrames" );
         }
         
+        /* Initinally plot an empty heatmap */
+        Plotly.plot(this.div, trace, layout,  {scrollZoom: false, staticPlot:false, displayModeBar: false, showLink:false});
+        
+        /* Bind the event listeners */
         this.bindEventListeners();
+        
     }
-    
+        
     /* Bind plotly event listeners*/
     bindEventListeners(){
         
@@ -136,57 +118,30 @@ class MyHeatmap{
     
     /* Add frames to the plot and animate */
     addFrames( json ){
-        var salts = json.salts;
         
-        frames = [];
-    
-        /* define slider */    
-        var _sliders = [{
-            pad: {t: 30},
-            currentvalue: {
-                xanchor: 'right', prefix: 'frame: ',font: {color: '#888',size: 20}
-            },
-        }];
-        
-        /* The 'steps' of the slider */
-        var _steps =[];
+        //console.log( Object.keys( json.frames ) )
                     
         /* Make the frames to animate */
-        var i;
-        for (var i = 0; i < salts.length; i ++){
-                    
-            frames.push({
-                name: "" + i,
+        var id;
+        
+        var processedFrames = [];
+        
+        Object.keys( json.frames ).map( function( key, index ){
+            
+            processedFrames.push( {
+                name: "" + key,
                 data: [{
-                    z: salts[i],
+                    z: json.frames[key],
                 }],
                 traces: [0],
-            });
-            
-            //make a new step for the slider
-            
-            var step = {
-                label : '' + i,
-                method: 'animate',
-                args: [["" + i], {
-                    mode: "next",
-                    transition: {"duration": 30},
-                    frame: {"duration": 30, "redraw": false}
-                    },
-                ]
-            }
-            
-            _steps.push( step )
-        }
-        
-        _sliders[0].steps = _steps;
-        
-        /* Relayout to insert the sliders */
-        Plotly.relayout( this.div, {sliders:_sliders, updatemenus : updatemenus})
+            } );
+        });
         
         /* Add and animate frames */
-        Plotly.addFrames( this.div, frames );
+        Plotly.addFrames( this.div, processedFrames );
         this.play();
+        
+        
     }
     
     
