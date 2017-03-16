@@ -1,8 +1,5 @@
-tests/javascript/gapminder-with-frames.json
-tests/javascript/gif-master/
-tests/webgl-heatmap/
-tests/plotly/trash/
 app/ncFiles
+app/static/webapp/react-ocean-app
 
 # Compiled source #
 ###################

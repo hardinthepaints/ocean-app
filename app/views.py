@@ -8,6 +8,9 @@ import json
 from time import sleep
 from math import sqrt
 
+#cross origin resource sharing library
+from flask_cors import CORS, cross_origin
+
 
 '''
 Views are handlers that respond to request from clients. Each methode with an '@' statement is a view.
@@ -25,6 +28,36 @@ def index():
     output = getData()
        
     return Response(json.dumps(output), mimetype='application/json')
+
+@cross_origin()
+@app.route('/json')
+def jsonData():
+       
+    #the frame after the last frame in the range returned (will NOT return this one)
+    end = int( request.args.get('end', 1) )
+    
+    #the first frame in the range to return
+    start = int(request.args.get('start', 0) )
+    
+    #whether or not this is the first call to the server
+    first = bool(request.args.get('first', False) )
+
+    output = getData( end=end, start=start, first=first )
+    
+    #the jsonp callback 
+    callback = request.args.get('callback')
+       
+    return Response(  json.dumps(output), mimetype='application/json')
+
+@cross_origin
+@app.route('/frames')
+def frames():
+    frame = int( request.args.get('frame', 0) )
+    first = False
+    if (frame == 0 ): first = True
+    
+    output = getData(end = frame+1, start = frame, first=first)
+    return Response(  json.dumps(output), mimetype='application/json')
 
 
 
@@ -45,7 +78,6 @@ def jsonp():
     
     #the jsonp callback 
     callback = request.args.get('callback')
-
        
     return Response( callback + "(" + json.dumps(output) + ")", mimetype='application/json')
 
@@ -60,8 +92,13 @@ def stream():
 
 #serve test files
 @app.route('/tests/<path:path>')
-def send_js(path):
+def send_test(path):
     directory = 'tests/'
+    return send_from_directory( directory, path)
+
+@app.route('/app/static/<path:path>')
+def send_static(path):
+    directory = 'app/static/'
     return send_from_directory( directory, path)
 
 #glean the unique values in order from many repeating values
@@ -87,7 +124,7 @@ def getMax( target ):
     return max( val for val in target)
 
 #given two arrays of values representing x and y values for a graph,
-#determine the ration of the x axis to the y axis
+#determine the ratio of the x axis to the y axis
 def getRatio( xvals, yvals ):
     xlength = getMax(xvals) - getMin(xvals)
     ylength = getMax(yvals) - getMin(yvals)
@@ -119,18 +156,18 @@ def getData( end, start, first ):
         #longitude - east and west
         lonp = ds.variables['lon_psi'][:]
         lonp = flatten( lonp )
-        output[ 'lonp' ] = gleanUniqueValues( lonp.tolist() )
+        output[ 'x' ] = gleanUniqueValues( lonp.tolist() )
 
         #latitude - north or south
         latp = ds.variables['lat_psi'][:]
         latp = flatten(latp)
-        output[ 'latp' ] = gleanUniqueValues( latp.tolist() )
+        output[ 'y' ] = gleanUniqueValues( latp.tolist() )
         
         #include the ratio of lon to lat
         output['ratio'] = getRatio( lonp, latp )
         
         #include the number of frames available
-        output['frames'] = len( ds.variables['salt'][0, :, :, :].squeeze() )
+        output['frameCount'] = len( ds.variables['salt'][0, :, :, :].squeeze() )
 
 
     
