@@ -1,4 +1,4 @@
-<h1 align="center">Ocean App (under development)<h1/>
+<h1 align="center">Ocean App Server (under development)<h1/>
 
 
 <p align="center">
@@ -11,7 +11,7 @@
 
 ## Synopsis
 
-This is a project to create a client-side web app which displays oceanography data in time-lapse form. 
+A Flask RESTful API to expose oceanography data in .netCDF format.
 
 ## Installation
 
