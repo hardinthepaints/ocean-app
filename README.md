@@ -37,6 +37,7 @@ A Flask RESTful API to expose oceanography data in .netCDF format.
 - [ ] Fix tests/python_test.py
 - [ ] Add streaming capability
 - [ ] Send time-based range of frames
+- [ ] Require username + password
  
 ## License
 
