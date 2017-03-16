@@ -14,6 +14,8 @@ const axisTemplate = {
     showlengend:false,
 };
 
+
+
 /* json data for the play and pause buttons */
 
 
@@ -76,6 +78,13 @@ const layout = {
     showlegend: false,
     width: 700,
     height: 700,
-    autosize: false,
+    autosize: true,
     dragmode: "select",
+    /* make background transparent*/
+    paper_bgcolor:'rgba(0,0,0,0)',
+    plot_bgcolor:'rgba(0,0,0,0)',
+    colorbar:{
+        bgcolor: 'transparent',
+        bordercolor:'transparent',
+    }
 };

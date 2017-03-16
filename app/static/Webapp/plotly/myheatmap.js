@@ -1,17 +1,15 @@
 /* A wrapper class for the Plotly chart 'heatmapgl'.
 Based off of the animation examples from the plotly.js websites
-Requests data from a server and adds to a plotly heatmap graph
 */
-
-
-
-
-
 
 class MyHeatmap{
     
     constructor( div, height ){
         
+        /* Bind functions which will be accessed outside of variable */
+        this.initHeatmap = this.initHeatmap.bind( this )
+        this.addFrames = this.addFrames.bind( this )
+
         /* define sliders */    
         this.sliders = [{
             pad: {t: 30},
@@ -67,7 +65,39 @@ class MyHeatmap{
         this.bindEventListeners();
         
     }
+           
+    /* Play through the frames */
+    play(){
         
+        /* Begin with initial animation */
+        Plotly.animate(this.div, null, updatemenus[0]['buttons'][0]['args'][1]);
+    }
+    
+    /* Add frames to the plot and animate */
+    addFrames( json ){
+        
+        //console.log( Object.keys( json.frames ) )
+                    
+        /* Make the frames to animate */        
+        var processedFrames = [];
+        
+        Object.keys( json.frames ).map( function( key, index ){
+            
+            processedFrames.push( {
+                name: "" + key,
+                data: [{
+                    z: json.frames[key],
+                }],
+                traces: [0],
+            } );
+        });
+        
+        /* Add and animate frames */
+        Plotly.addFrames( this.div, processedFrames );
+        this.play();
+             
+    }
+    
     /* Bind plotly event listeners*/
     bindEventListeners(){
         
@@ -107,41 +137,6 @@ class MyHeatmap{
         myPlot.on('plotly_afterplot', function(){
             console.log("afterplot");
         });
-    }
-    
-    /* Play through the frames */
-    play(){
-        
-        /* Begin with initial animation */
-        Plotly.animate(this.div, null, updatemenus[0]['buttons'][0]['args'][1]);
-    }
-    
-    /* Add frames to the plot and animate */
-    addFrames( json ){
-        
-        //console.log( Object.keys( json.frames ) )
-                    
-        /* Make the frames to animate */
-        var id;
-        
-        var processedFrames = [];
-        
-        Object.keys( json.frames ).map( function( key, index ){
-            
-            processedFrames.push( {
-                name: "" + key,
-                data: [{
-                    z: json.frames[key],
-                }],
-                traces: [0],
-            } );
-        });
-        
-        /* Add and animate frames */
-        Plotly.addFrames( this.div, processedFrames );
-        this.play();
-        
-        
     }
     
     

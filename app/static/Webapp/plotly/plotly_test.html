@@ -1,6 +1,6 @@
 <!doctype html>
     
-<!-- An html page to test the server by querying for and displaying the data.
+<!-- An html page to test the server and plotly rendering by querying for and displaying the data.
     To run:
         Run the server.
             In terminal or command line, type in 'python3 run.py' and hit enter
@@ -10,15 +10,10 @@
 
 <html lang="en">
 <head>
-    <title>Javascript Test</title>
-    
+    <title>plotly_test</title>
     <script src="myajax.js"></script>
-    
     <script src="plotly-latest.min.js"></script>
-    
     <script src="myheatmap.formats.js"></script>
-
-    
     <script src = "myheatmap.js"></script>
     
 
@@ -29,14 +24,13 @@
                 
     <script>
         
-        const url = "http://localhost:5000/jsonp"
+        const url = "http://localhost:5000/json"
         
         var hm = new MyHeatmap("myDiv", 600)
         
-        /* initially download data and plot */
-        downloadData( url, {callback:"hm.initHeatmap", first:true })
+        downloadData( url, {callback:hm.initHeatmap, first:true })
         
-        downloadData( url, {callback:"hm.addFrames", start:0, end:40})
+        downloadData( url, {callback:hm.addFrames, start:0, end:40})
     
     </script>
 
