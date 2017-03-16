@@ -1,5 +1,10 @@
 <h1 align="center">Ocean App (under development)<h1/>
 
+
+<p align="center">
+    <img src ="app/static/command_line_demo.gif?" />
+</p>
+
 <p align="center">
     <img src ="app/static/slider_demo2.gif?" />
 </p>
