@@ -28,7 +28,7 @@ A Flask RESTful API to expose oceanography data in .netCDF format.
     `$ export FLASK_APP=run.py`  
     `$ export FLASK_DEBUG=1`  
     `$ flask run`  
-3. Open app/static/webapp/plotly/plotly_test.html in a browser. Or, go to [http://localhost:5000/app/static/webapp/plotly/plotly_test.html]("http://localhost:5000/app/static/webapp/plotly/plotly_test.html")
+3. Open [app/static/webapp/plotly/plotly_test.html](app/static/webapp/plotly/plotly_test.html) in a browser. Or, go to [http://localhost:5000/app/static/webapp/plotly/plotly_test.html](http://localhost:5000/app/static/webapp/plotly/plotly_test.html )
 4. According to [Plotly benchmarks](https://plot.ly/benchmarks/ "this"), Chrome is the fastest browser for rendering heatmaps.
 
 ## License
