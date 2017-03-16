@@ -13,6 +13,7 @@ This is a project to create a client-side web app which displays oceanography da
 1. Download .zip of repository
 2. Install requirements: `pip install -r requirements.txt`
 3. On OS X, Linux and Cygwin you mush indicate 'run.py' is an executable file: `chmod a+x run.py`
+4. Download the .nc files (could take a couple hours): `cd app` `python3 forcastdownloader`
 
 ## Usage
 
