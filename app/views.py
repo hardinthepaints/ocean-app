@@ -3,6 +3,7 @@
 import netCDF4 as nc
 from flask import send_from_directory, Response, request, jsonify, url_for, abort
 
+
 #import modules
 from app import app, db_functions, auth_functions
 
@@ -27,12 +28,24 @@ auto = Autodoc(app)
 
 app.config['dataFN'] = 'app/static/ocean_his_0002.nc'
 
+
+def add_header(r):
+    """
+    Add headers to both force latest IE rendering engine or Chrome Frame,
+    and also to cache the rendered page for 10 minutes.
+    """
+    r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    r.headers["Pragma"] = "no-cache"
+    r.headers["Expires"] = "0"
+    r.headers['Cache-Control'] = 'public, max-age=0'
+    return r
+
 #Index - uncomment to make active endpoint
 @app.route('/oceanapp/v1.0/app/static/<path:path>', methods=['GET'])
 @auto.doc(groups=['private', 'public'])
 def index(path): 
     directory = 'app/static/'
-    return send_from_directory( directory, path)
+    return add_header( send_from_directory( directory, path) )
 
 #
 #@app.route('/app/static/<path:path>')
@@ -42,10 +55,12 @@ def index(path):
 #    directory = 'app/static/'
 #    return send_from_directory( directory, path)
 
+
+
 #Get data from the sql db.
-@cross_origin()
 @auto.doc(groups=['private', 'public'])
 @app.route('/oceanapp/v1.0/jsonsql', methods=['GET'])
+@cross_origin(allow_headers="*", expose_headers="Content-length")
 @auth_functions.auth.login_required
 def jsonsql():
     """Return json data from the sql db. Login required."""
@@ -67,12 +82,14 @@ def jsonsql():
         outputJson += '{{ "z":{}, "yyyymmddhh":{} }},'.format( row[1], row[0] )
     outputJson = outputJson[0:-1] + "]"
     
-    return Response( outputJson, status=status,  content_type='application/json')
-  
+    r = Response( outputJson, status=status,  content_type='application/json')
+    return r
+
+
 #Get data from .nc files
-@cross_origin()
 @auto.doc(groups=['private', 'public'])
 @app.route('/oceanapp/v1.0/json/<date>', methods=['GET'])
+@cross_origin(allow_headers="*")
 def json(date):
     """Return json data based on params, queried from netCDF files. The date arguement should be in yyyymmdd format."""
     date=str(date)
@@ -171,6 +188,10 @@ def private_doc():
     """Display documentation for how to use this api and private functions"""
     return auto.html(groups=['private'], title='Ocean App Web Service Private Documentation')
 
+
+
+
+
 #HELPER FUNCTIONS
 def getInt( value ):
     """Attempt to convert to an int and if fail then return None"""
@@ -186,7 +207,9 @@ def hourIsReal( hour ):
         return False
     if hour not in range(2, 73):
         return False
-    return True  
+    return True
+
+
             
 
        

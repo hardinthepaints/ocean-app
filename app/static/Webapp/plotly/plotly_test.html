@@ -31,11 +31,10 @@
         const url = "http://localhost:5000/oceanapp/v1.0/jsonsql"
         
         var hm = new MyHeatmap("myDiv", 600)
-        
+                
+        /* Request data from the server and callback to the heatmap instance */
         downloadData( url, {callback:hm.initHeatmap})
-        
-        //downloadData( url, {callback:hm.addFrames, start:0, end:40})
-    
+            
     </script>
 
 </body>

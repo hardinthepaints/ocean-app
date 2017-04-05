@@ -9,6 +9,7 @@ from flask_cors import CORS, cross_origin
 #according to documentation it is necesary to define the root path
 app = Flask(__name__, root_path = os.getcwd() )
 
+#activate cross origin requests
 cors = CORS( app )
 
 #imports 'views' --at end of file to avoid circular refs

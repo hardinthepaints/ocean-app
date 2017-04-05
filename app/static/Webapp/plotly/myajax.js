@@ -1,38 +1,30 @@
 
 
-/* import a script with the given filename*/
-function importScript( filename ){
-    var imported = document.createElement('script');
-    imported.src = filename;
-    document.head.appendChild(imported);
+function printSpeed( content_length, timeElapsed ){
+    var size = "size: " + (content_length/(Math.pow(2,20))).toFixed(3) + " mb"
+    var time = "download time elapsed:" + (timeElapsed/1000).toFixed(5) + " s"
+    var speed = "speed: " + ((content_length/(Math.pow(2,20)))/(timeElapsed/1000)).toFixed(3) + " mb/s"
     
+    console.log( "DOWNLOADED DATA:\n" + size + ",\n" + time + ",\n" + speed)
+    
+
 }
-
-/* import jquery */
-//console.log( "imported jquery" )
-
-//importScript( "jquery-3.1.1.min.js" );
-
-
 function downloadData( url, args, username="xman", password="el33tnoob" ){
     
     /* args as they pertain to the server
-     * 'end': the last frame to return, (not inclusive)
-     * 'start': the first frame to return (inclusive)
-     * 'first': Boolean whether or not this is the first call
      * 'callback': the string name of the javascript function to call when this request is answered
-     * example: var args = { start : 0, end : 30, first : true, callback: 'handleJSON' }
-            //request the first 30 frames, this is the first request, and callback to handleJSON()
-     * 
     */
     
     /* Default args */
     var template = {callback:"hm.handleJSON"};
     
+    /* Overwrite defaults if other values are provided.*/
     for (var attrname in args) { template[attrname] = args[attrname]; }
         
     var callback = template.callback;
     delete template.callback
+    
+    var start = performance.now();
                 
     /* make asynchronous call */
     /* JSON Cross-origin Ajax request to the server */
@@ -40,7 +32,10 @@ function downloadData( url, args, username="xman", password="el33tnoob" ){
         url: url,
         dataType: "json",
         data: template,
-        success: callback,
+        success: (data, textStatus, jqXHR) => {
+            printSpeed( jqXHR.getResponseHeader("Content-Length"), performance.now()-start );
+            callback(data);
+        },
         beforeSend: function (xhr) {
             xhr.setRequestHeader ("Authorization", "Basic " + btoa(username + ":" + password));
         },

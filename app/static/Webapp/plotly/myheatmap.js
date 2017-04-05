@@ -34,6 +34,8 @@ class MyHeatmap{
     /* Initially plot the map with one frame of data */
     initHeatmap( json ){
         
+        
+        console.time("initHeatmap")
         var z = json[0].z;
         
         /* Initial data Data */
@@ -45,7 +47,7 @@ class MyHeatmap{
                 hoverinfo:"z+text",            
                 type: 'heatmapgl',
                 colorscale: 'Jet',
-                opacity: 1,
+                opacity: 1.0,
                 reversescale: false,
                 name:'trace0',
                 connectgaps: false,
@@ -68,7 +70,12 @@ class MyHeatmap{
         /* Initinally plot an empty heatmap */
         Plotly.plot(this.div, trace, layout,  {scrollZoom: false, staticPlot:false, displayModeBar: false, showLink:false});
         
+        console.timeEnd("initHeatmap")
+        
+        console.time("addFrames")
         this.addFrames( json.slice(1) )
+        console.timeEnd("addFrames")
+
         
         /* Bind the event listeners */
         this.bindEventListeners();
@@ -77,9 +84,6 @@ class MyHeatmap{
            
     /* Play through the frames */
     play(){
-        console.log("play")
-        
-        //frames = [1, 5, 7, 50, 60, 70]
         
         frames = Array.apply(null, Array(71)).map(function (_, i) {return i;});
 
@@ -90,8 +94,6 @@ class MyHeatmap{
     
     /* Add frames to the plot and animate */
     addFrames( json ){
-        
-        //console.log( Object.keys( json.frames ) )
                     
         /* Make the frames to animate */        
         var processedFrames = [];
