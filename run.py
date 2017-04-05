@@ -6,7 +6,7 @@ from app import app
 
 #run in debug mode if in args
 if ( "-d" in sys.argv ):
-    app.run( debug=True, extra_files=["tests/plotly/javascript_test.html"] )
+    app.run( debug=True )
 else:
     app.run( debug=False )
 
