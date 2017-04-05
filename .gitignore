@@ -1,5 +1,8 @@
 app/ncFiles
 app/static/webapp/react-ocean-app
+app.db
+app/tests
+app/viewsB/py
 
 # Compiled source #
 ###################
