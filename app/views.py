@@ -1,184 +1,196 @@
 #!/usr/bin/env python
 
 import netCDF4 as nc
-from app import app
-from flask import send_from_directory, Response, request
+from flask import send_from_directory, Response, request, jsonify, url_for, abort
+
+#import modules
+from app import app, db_functions, auth_functions
+
 import os
-import json
+import json as JSON
+import warnings
 from time import sleep
 from math import sqrt
+import time
 
 #cross origin resource sharing library
 from flask_cors import CORS, cross_origin
 
+# disable autodoc internal Warning
+# https://github.com/acoomans/flask-autodoc/issues/27
+from flask.exthook import ExtDeprecationWarning
+warnings.simplefilter('ignore', ExtDeprecationWarning)
 
-'''
-Views are handlers that respond to request from clients. Each methode with an '@' statement is a view.
-'''
+#setup auto doc decorator
+from flask.ext.autodoc import Autodoc
+auto = Autodoc(app)
 
-dataFN = 'app/static/ocean_his_0002.nc'
+app.config['dataFN'] = 'app/static/ocean_his_0002.nc'
 
-
-
-#serve the data in json
-@app.route('/')
-@app.route('/index')
-def index(): 
-    
-    output = getData()
-       
-    return Response(json.dumps(output), mimetype='application/json')
-
-@cross_origin()
-@app.route('/json')
-def jsonData():
-       
-    #the frame after the last frame in the range returned (will NOT return this one)
-    end = int( request.args.get('end', 1) )
-    
-    #the first frame in the range to return
-    start = int(request.args.get('start', 0) )
-    
-    #whether or not this is the first call to the server
-    first = bool(request.args.get('first', False) )
-
-    output = getData( end=end, start=start, first=first )
-    
-    #the jsonp callback 
-    callback = request.args.get('callback')
-       
-    return Response(  json.dumps(output), mimetype='application/json')
-
-@cross_origin
-@app.route('/frames')
-def frames():
-    frame = int( request.args.get('frame', 0) )
-    first = False
-    if (frame == 0 ): first = True
-    
-    output = getData(end = frame+1, start = frame, first=first)
-    return Response(  json.dumps(output), mimetype='application/json')
-
-
-
-#serve data in jsonp with provided callback
-@app.route('/jsonp')
-def jsonp():
-       
-    #the frame after the last frame in the range returned (will NOT return this one)
-    end = int( request.args.get('end', 1) )
-    
-    #the first frame in the range to return
-    start = int(request.args.get('start', 0) )
-    
-    #whether or not this is the first call to the server
-    first = bool(request.args.get('first', False) )
-
-    output = getData( end=end, start=start, first=first )
-    
-    #the jsonp callback 
-    callback = request.args.get('callback')
-       
-    return Response( callback + "(" + json.dumps(output) + ")", mimetype='application/json')
-
-@app.route('/stream_sqrt')
-def stream():
-    def generate():
-        for i in range(500):
-            yield '{}\n'.format( sqrt(i) )
-            sleep(.05)
-
-    return app.response_class(generate(), mimetype='text/plain')
-
-#serve test files
-@app.route('/tests/<path:path>')
-def send_test(path):
-    directory = 'tests/'
-    return send_from_directory( directory, path)
-
-@app.route('/app/static/<path:path>')
-def send_static(path):
+#Index - uncomment to make active endpoint
+@app.route('/oceanapp/v1.0/app/static/<path:path>', methods=['GET'])
+@auto.doc(groups=['private', 'public'])
+def index(path): 
     directory = 'app/static/'
     return send_from_directory( directory, path)
 
-#glean the unique values in order from many repeating values
-def gleanUniqueValues( arr ):
-    dic = {}
-    out = []
-    for v in arr:
-        if v in dic:
-            pass
+#
+#@app.route('/app/static/<path:path>')
+#@auto.doc(groups=['public'])
+#def send_static(path):
+#    """Serve static files"""
+#    directory = 'app/static/'
+#    return send_from_directory( directory, path)
+
+#Get data from the sql db.
+@cross_origin()
+@auto.doc(groups=['private', 'public'])
+@app.route('/oceanapp/v1.0/jsonsql', methods=['GET'])
+@auth_functions.auth.login_required
+def jsonsql():
+    """Return json data from the sql db. Login required."""
+    status = 200
+    output = {}
+
+    db = db_functions.get_db()
+    
+    #limit the number of rows to return
+    limit = 75
+    
+    result = db.execute("select * from entries limit ?", [limit])
+    queryResult = result.fetchall()
+    
+    #store data in a string, which is correct json format
+    outputJson = "["
+        
+    for row in queryResult:
+        outputJson += '{{ "z":{}, "yyyymmddhh":{} }},'.format( row[1], row[0] )
+    outputJson = outputJson[0:-1] + "]"
+    
+    return Response( outputJson, status=status,  content_type='application/json')
+  
+#Get data from .nc files
+@cross_origin()
+@auto.doc(groups=['private', 'public'])
+@app.route('/oceanapp/v1.0/json/<date>', methods=['GET'])
+def json(date):
+    """Return json data based on params, queried from netCDF files. The date arguement should be in yyyymmdd format."""
+    date=str(date)
+    status = 200
+    
+    #if the date is not on the system return not found
+    if not os.path.exists("app/ncFiles/{}".format(date)):
+        abort(404)
+        
+    args = request.args
+    
+    try:
+        hours = args.getlist("hours")
+        if (len(hours) == 0): abort(404)
+    except:
+        abort(404)
+        
+    output = { "url":url_for('json', date=date, hours=args.getlist("hours"), _external=True)}
+    
+    frames = {}
+    def checkHour(hour):
+        
+        #key format yyyymmddhh
+        key = date + hour.zfill(2)
+        if ( hourIsReal(hour)):
+            frames[ key ] = {"id":hour.zfill(4)}
         else:
-            dic[v] = True
-            out.append( v )
-    return out
+            pass
+            #frames[ key ] = None
+    
+        
+    for val in hours:
+        checkHour(val)    
+        
+    
+    for key in frames.keys():
+        if (frames[ key ] != None):
+            identity = frames[key]['id']
+            frames[ key ]['z'] = getDataByHour(date, identity) 
+    
+    output["hoursData"] = frames
 
-#flatten a 2 dimensional numpy array
-def flatten( numpy ):
-    return numpy.reshape( -1 )
+        
+    return jsonify( output ), status
 
-def getMin( target ):
-    return min( val for val in target)
+def getDataByHour(date, hour):
+    """Get the top layer of salinity data for the given date and hour"""
+    fileName = "app/ncFiles/{}/ocean_his_{}.nc".format( date, hour )
+    return getData(1, 0, fileName)
 
-def getMax( target ):
-    return max( val for val in target)
-
-#given two arrays of values representing x and y values for a graph,
-#determine the ratio of the x axis to the y axis
-def getRatio( xvals, yvals ):
-    xlength = getMax(xvals) - getMin(xvals)
-    ylength = getMax(yvals) - getMin(yvals)
-    return float(xlength) / float(ylength)  
 
 #open a .nc file and collect data
 #Return the specified number of layers
-def getData( end, start, first ):
-    ds = nc.Dataset( dataFN )
+def getData( end, start, fileName ):
+    """Get the given range of layers of salinity from the given .nc file. If the range only includes one layer, return None"""
     
-    output = {}
-
+    try:
+        ds = nc.Dataset( fileName )
+    except:
+        return None
+    
     #ensure the layers correspond to correct indexes
     end = min( end, len( ds.variables['salt'][0]) )
     end = max( end, 1 )
      
-    #salts = [None] * end
     salts = {}
     for i in range( start, end ):
         salt = ds.variables['salt'][0, i, :, :].squeeze()
         salt = salt.tolist()
         salts[i] = salt
-        
     
-    salt = ds.variables['salt'][0, 0, :, :].squeeze()
+    #close the dataset
+    ds.close()
     
-    #if the first call by the client
-    if ( first ):
-        #longitude - east and west
-        lonp = ds.variables['lon_psi'][:]
-        lonp = flatten( lonp )
-        output[ 'x' ] = gleanUniqueValues( lonp.tolist() )
-
-        #latitude - north or south
-        latp = ds.variables['lat_psi'][:]
-        latp = flatten(latp)
-        output[ 'y' ] = gleanUniqueValues( latp.tolist() )
-        
-        #include the ratio of lon to lat
-        output['ratio'] = getRatio( lonp, latp )
-        
-        #include the number of frames available
-        output['frameCount'] = len( ds.variables['salt'][0, :, :, :].squeeze() )
-
-
+    if ( len(salts) == 0 ): return None
+    elif ( len(salts) == 1): return salts[0]
+    else: return salts
     
-    output['frames'] = salts
-    
+#Error Handling    
+@app.errorhandler(404)
+def not_found(error):
+    """Make the 404 response json instead of the default html"""
+    return jsonify(error=str(error)), 404
 
-    
-    return output
+#Documentation endpoints
+@app.route('/oceanapp/v1.0/doc/')
+@app.route('/oceanapp/v1.0/doc/public', methods=['GET'])
+@auto.doc(groups=['public'])
+def public_doc():
+    """Documentation for this api."""
+    return auto.html(groups=['public'], title='Ocean App Web Service Public Documentation')
 
+@app.route('/oceanapp/v1.0/doc/private', methods=['GET'])
+@auto.doc(groups=['private'])
+def private_doc():
+    """Display documentation for how to use this api and private functions"""
+    return auto.html(groups=['private'], title='Ocean App Web Service Private Documentation')
 
+#HELPER FUNCTIONS
+def getInt( value ):
+    """Attempt to convert to an int and if fail then return None"""
+    try:
+        return int(value)
+    except ValueError:
+        return None
     
+def hourIsReal( hour ):
+    """Check if the hour is a real hour in our dataset"""
+    hour = getInt( hour )
+    if hour == None:
+        return False
+    if hour not in range(2, 73):
+        return False
+    return True  
+            
+
+       
+
 
 
 
