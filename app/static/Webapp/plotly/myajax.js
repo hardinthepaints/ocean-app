@@ -9,10 +9,13 @@ function importScript( filename ){
 }
 
 /* import jquery */
-importScript( "jquery-3.1.1.min.js" );
+//console.log( "imported jquery" )
+
+//importScript( "jquery-3.1.1.min.js" );
 
 
-function downloadData( url, args ){
+function downloadData( url, args, username="xman", password="el33tnoob" ){
+    
     /* args as they pertain to the server
      * 'end': the last frame to return, (not inclusive)
      * 'start': the first frame to return (inclusive)
@@ -24,53 +27,23 @@ function downloadData( url, args ){
     */
     
     /* Default args */
-    var template = {callback:"hm.handleJSON", end:1, start:0};
+    var template = {callback:"hm.handleJSON"};
     
     for (var attrname in args) { template[attrname] = args[attrname]; }
         
     var callback = template.callback;
     delete template.callback
-    
-    console.log( template )
-            
+                
     /* make asynchronous call */
-    /* 'JSON Padded' Cross-origin Ajax request to the server */
+    /* JSON Cross-origin Ajax request to the server */
     $.ajax({
         url: url,
         dataType: "json",
         data: template,
         success: callback,
+        beforeSend: function (xhr) {
+            xhr.setRequestHeader ("Authorization", "Basic " + btoa(username + ":" + password));
+        },
     });   
     
 }
-
-///* Download a range of data frames using an ajax request */
-//function downloadData( url, args ){
-//            
-//    /* args as they pertain to the server
-//     * end: the last frame to return, (not inclusive)
-//     * start: the first frame to return (inclusive)
-//     * first: Boolean whether or not this is the first call
-//     * callback: the name of the javascript function to call when this request is answered
-//    */
-//    
-//    /* Default args */
-//    var template = {callback:"hm.handleJSON", end:1, start:0};
-//    
-//    for (var attrname in args) { template[attrname] = args[attrname]; }
-//        
-//    var callback = template.callback;
-//    delete template.callback
-//    
-//    console.log( template )
-//            
-//    /* make asynchronous call */
-//    /* 'JSON Padded' Cross-origin Ajax request to the server */
-//    $.ajax({
-//        url: url,
-//        dataType: "jsonp",
-//        data: template,
-//        jsonpCallback: callback,
-//    });
-//        
-//}

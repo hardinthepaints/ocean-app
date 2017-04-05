@@ -11,10 +11,14 @@
 <html lang="en">
 <head>
     <title>plotly_test</title>
-    <script src="myajax.js"></script>
     <script src="plotly-latest.min.js"></script>
     <script src="myheatmap.formats.js"></script>
     <script src = "myheatmap.js"></script>
+    
+    <script src="jquery-3.1.1.min.js"></script>
+    <script src="myajax.js"></script>
+
+
     
 
 </head>
@@ -24,13 +28,13 @@
                 
     <script>
         
-        const url = "http://localhost:5000/json"
+        const url = "http://localhost:5000/oceanapp/v1.0/jsonsql"
         
         var hm = new MyHeatmap("myDiv", 600)
         
-        downloadData( url, {callback:hm.initHeatmap, first:true })
+        downloadData( url, {callback:hm.initHeatmap})
         
-        downloadData( url, {callback:hm.addFrames, start:0, end:40})
+        //downloadData( url, {callback:hm.addFrames, start:0, end:40})
     
     </script>
 

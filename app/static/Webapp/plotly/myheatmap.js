@@ -9,6 +9,10 @@ class MyHeatmap{
         /* Bind functions which will be accessed outside of variable */
         this.initHeatmap = this.initHeatmap.bind( this )
         this.addFrames = this.addFrames.bind( this )
+        this.bindEventListeners = this.bindEventListeners.bind( this )
+        this.play = this.play.bind( this )
+
+
 
         /* define sliders */    
         this.sliders = [{
@@ -30,7 +34,7 @@ class MyHeatmap{
     /* Initially plot the map with one frame of data */
     initHeatmap( json ){
         
-        var z = json.frames[0];
+        var z = json[0].z;
         
         /* Initial data Data */
         var trace = [
@@ -46,6 +50,9 @@ class MyHeatmap{
                 name:'trace0',
                 connectgaps: false,
                 zsmooth:"fast",
+                zauto:false,
+                /* zmin:15,
+                zmax:33,  */
             }
         ];
         
@@ -61,6 +68,8 @@ class MyHeatmap{
         /* Initinally plot an empty heatmap */
         Plotly.plot(this.div, trace, layout,  {scrollZoom: false, staticPlot:false, displayModeBar: false, showLink:false});
         
+        this.addFrames( json.slice(1) )
+        
         /* Bind the event listeners */
         this.bindEventListeners();
         
@@ -68,9 +77,15 @@ class MyHeatmap{
            
     /* Play through the frames */
     play(){
+        console.log("play")
+        
+        //frames = [1, 5, 7, 50, 60, 70]
+        
+        frames = Array.apply(null, Array(71)).map(function (_, i) {return i;});
+
         
         /* Begin with initial animation */
-        Plotly.animate(this.div, null, updatemenus[0]['buttons'][0]['args'][1]);
+        Plotly.animate(this.div, frames, updatemenus[0]['buttons'][0]['args'][1]);
     }
     
     /* Add frames to the plot and animate */
@@ -81,12 +96,13 @@ class MyHeatmap{
         /* Make the frames to animate */        
         var processedFrames = [];
         
-        Object.keys( json.frames ).map( function( key, index ){
-            
+        //Object.keys( json.frames ).map( function( key, index ){
+        json.map( function( frame, key ){
+          
             processedFrames.push( {
                 name: "" + key,
                 data: [{
-                    z: json.frames[key],
+                    z: frame.z,
                 }],
                 traces: [0],
             } );
@@ -124,11 +140,13 @@ class MyHeatmap{
             console.log("relayout traces:" );
         });
         
-        /* No data provided */
-        myPlot.on('plotly_animated', function(  data ){           
+        function loop(data) {
             console.log("animated " + stringify( plotData ));
-            
-        });
+            console.log( "this:" + Object.keys( this ) );
+        }
+        
+        /* No data provided */
+        myPlot.on('plotly_animated', this.play);
         
         myPlot.on('plotly_redraw', function(){
             console.log("redraw");
