@@ -44,7 +44,6 @@ def add_header(r):
 #Index - uncomment to make active endpoint
 @app.route('/oceanapp/v1.0/app/static/<path:path>', methods=['GET'])
 @auto.doc(groups=['private', 'public'])
-@gzipped
 def index(path): 
     directory = 'app/static/'
     return add_header( send_from_directory( directory, path) )
