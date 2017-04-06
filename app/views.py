@@ -3,7 +3,6 @@
 import netCDF4 as nc
 from flask import send_from_directory, Response, request, jsonify, url_for, abort
 
-
 #import modules
 from app import app, db_functions, auth_functions
 
@@ -28,6 +27,8 @@ auto = Autodoc(app)
 
 app.config['dataFN'] = 'app/static/ocean_his_0002.nc'
 
+from app import compress_functions
+gzipped = compress_functions.gzipped
 
 def add_header(r):
     """
@@ -43,23 +44,15 @@ def add_header(r):
 #Index - uncomment to make active endpoint
 @app.route('/oceanapp/v1.0/app/static/<path:path>', methods=['GET'])
 @auto.doc(groups=['private', 'public'])
+@gzipped
 def index(path): 
     directory = 'app/static/'
     return add_header( send_from_directory( directory, path) )
 
-#
-#@app.route('/app/static/<path:path>')
-#@auto.doc(groups=['public'])
-#def send_static(path):
-#    """Serve static files"""
-#    directory = 'app/static/'
-#    return send_from_directory( directory, path)
-
-
-
 #Get data from the sql db.
 @auto.doc(groups=['private', 'public'])
 @app.route('/oceanapp/v1.0/jsonsql', methods=['GET'])
+@gzipped
 @cross_origin(allow_headers="*", expose_headers="Content-length")
 @auth_functions.auth.login_required
 def jsonsql():
@@ -84,6 +77,16 @@ def jsonsql():
     
     r = Response( outputJson, status=status,  content_type='application/json')
     return r
+
+@app.route('/oceanapp/v1.0/stream_sqrt')
+@auto.doc(groups=['public'])
+def stream():
+    def generate():
+        for i in range(500):
+            yield '{}\n'.format( sqrt(i) )
+            #sleep(.05)
+
+    return app.response_class(generate(), mimetype='text/plain')
 
 
 #Get data from .nc files

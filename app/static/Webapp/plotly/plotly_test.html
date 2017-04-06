@@ -18,11 +18,12 @@
     <script src="jquery-3.1.1.min.js"></script>
     <script src="myajax.js"></script>
 
-
-    
-
 </head>
 <body>
+    
+    <p>This is the latest output: <span id="latest"></span></p>
+    <p>This is all the output:</p>
+    <ul id="output"></ul>
     
     <div id="myDiv" align="center" ></div>
                 
@@ -31,7 +32,9 @@
         const url = "http://localhost:5000/oceanapp/v1.0/jsonsql"
         
         var hm = new MyHeatmap("myDiv", 600)
-                
+        
+        
+        //streamData("http://localhost:5000/oceanapp/v1.0/stream_sqrt", null )        
         /* Request data from the server and callback to the heatmap instance */
         downloadData( url, {callback:hm.initHeatmap})
             
