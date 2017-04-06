@@ -4,7 +4,10 @@ import netCDF4 as nc
 from flask import send_from_directory, Response, request, jsonify, url_for, abort
 
 #import modules
-from app import app, db_functions, auth_functions
+from app import app, db_functions, auth_functions, compress_functions
+gzipped = compress_functions.gzipped
+zipp = compress_functions.zipp
+auth = auth_functions.auth
 
 import os
 import json as JSON
@@ -27,8 +30,6 @@ auto = Autodoc(app)
 
 app.config['dataFN'] = 'app/static/ocean_his_0002.nc'
 
-from app import compress_functions
-gzipped = compress_functions.gzipped
 
 def add_header(r):
     """
@@ -49,13 +50,12 @@ def index(path):
     return add_header( send_from_directory( directory, path) )
 
 #Get data from the sql db.
-@auto.doc(groups=['private', 'public'])
 @app.route('/oceanapp/v1.0/jsonsql', methods=['GET'])
-@gzipped
+@auto.doc(groups=['private', 'public'])
 @cross_origin(allow_headers="*", expose_headers="Content-length")
-@auth_functions.auth.login_required
+@auth.login_required
 def jsonsql():
-    """Return json data from the sql db. Login required."""
+    """Return json data from the sql db. Login required. If 'gzip=true' in query, then the response will be compressed."""
     status = 200
     output = {}
 
@@ -75,6 +75,10 @@ def jsonsql():
     outputJson = outputJson[0:-1] + "]"
     
     r = Response( outputJson, status=status,  content_type='application/json')
+    
+    #if the request contains 'gzip' in the query, then compress them
+    if (request.args.get("gzip")):
+        return zipp(r)
     return r
 
 @app.route('/oceanapp/v1.0/stream_sqrt')
@@ -89,17 +93,13 @@ def stream():
 
 
 #Get data from .nc files
-@auto.doc(groups=['private', 'public'])
 @app.route('/oceanapp/v1.0/json/<date>', methods=['GET'])
+@auto.doc(groups=['private', 'public'])
 @cross_origin(allow_headers="*")
 def json(date):
     """Return json data based on params, queried from netCDF files. The date arguement should be in yyyymmdd format."""
     date=str(date)
     status = 200
-    
-    #if the date is not on the system return not found
-    if not os.path.exists("app/ncFiles/{}".format(date)):
-        abort(404)
         
     args = request.args
     
@@ -189,10 +189,6 @@ def public_doc():
 def private_doc():
     """Display documentation for how to use this api and private functions"""
     return auto.html(groups=['private'], title='Ocean App Web Service Private Documentation')
-
-
-
-
 
 #HELPER FUNCTIONS
 def getInt( value ):

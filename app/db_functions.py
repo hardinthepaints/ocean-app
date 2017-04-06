@@ -8,13 +8,11 @@ from app import app, views
 from sqlite3 import dbapi2 as sqlite3
 import netCDF4 as nc
 import json
+import click
 
 
 app.config.update(dict(
     DATABASE=os.path.join(app.root_path, 'app.db'),
-    SECRET_KEY='development key',
-    USERNAME='admin',
-    PASSWORD='default'
 ))
 
 def connect_db():
@@ -23,6 +21,9 @@ def connect_db():
     rv.row_factory = sqlite3.Row
     return rv
 
+def setcwd(path):
+    '''set the current working directory to the path'''    
+    os.chdir(path)
 
 def init_db():
     """Initializes the database."""
@@ -66,6 +67,7 @@ def populate_db():
 @app.cli.command('initdb')
 def initdb_command():
     """Creates the database tables."""
+    click.echo('Init the db')
     init_db()
     print('Initialized the database.')
     populate_db()

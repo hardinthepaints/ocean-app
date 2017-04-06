@@ -1,4 +1,7 @@
-import os
+import os, sys
+
+sys.path.append('../')
+
 from app import app
 import unittest
 import tempfile
@@ -37,17 +40,15 @@ ENTRY_POINT = "/oceanapp/v1.0"
 
 class FlaskrTestCase(unittest.TestCase):
     
-
     def setUp(self):
         """setup client testing"""
         self.app = app.test_client()
-        self.context = flask.Flask(__name__)
-        
+        self.context = flask.Flask(__name__)        
 
     def tearDown(self):
         """End client testing"""
         #os.close(self.db_fd)
-        #os.unlink(flaskr.app.config['DATABASE'])
+        #os.unlink(app.config['DATABASE'])
         pass
     
     #REAL ENDPOINTS
@@ -81,7 +82,8 @@ class FlaskrTestCase(unittest.TestCase):
         
         result = loadJSON( rv.data )
 
-        assert '200' in rv.status
+        
+        assert '200' in rv.status, "unexpected status. expected {} but got {}".format('200', rv.status)
         
         assert 'hoursData' in result
         assert type(result) == type({}), "Unexpected json result type. Expected {} but got {}".format( type({}), type(result) )
@@ -92,10 +94,13 @@ class FlaskrTestCase(unittest.TestCase):
     def test_jsonsql(self):
         endpoint = ENTRY_POINT + '/jsonsql'
         
+        #encode the username and password
+        usrpass = b64encode(("{0}:{1}".format("xman", "el33tnoob")).encode('utf-8')).decode('ascii')
+
         headers = {
-            'Authorization': 'Basic ' + "{0}:{1}".format("xman", "el33tnoob")
+            'Authorization': 'Basic ' + usrpass
         }
-        
+                
         rv = self.app.get( endpoint, query_string=None, headers=headers)
         
         #check authorized

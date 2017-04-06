@@ -5,13 +5,7 @@
 from flask import jsonify
 import warnings
 
-
-# disable autodoc internal Warning
-# https://github.com/acoomans/flask-autodoc/issues/27
-from flask.exthook import ExtDeprecationWarning
-warnings.simplefilter('ignore', ExtDeprecationWarning)
-
-from flask.ext.httpauth import HTTPBasicAuth
+from flask_httpauth import HTTPBasicAuth
 auth = HTTPBasicAuth()
 
 @auth.get_password

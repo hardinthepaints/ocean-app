@@ -50,6 +50,7 @@ function downloadData( url, args, username="xman", password="el33tnoob" ){
     
     /* args as they pertain to the server
      * 'callback': the string name of the javascript function to call when this request is answered
+     * 'gzip' if included, the response will be compressed
     */
     
     /* Default args */
@@ -70,11 +71,13 @@ function downloadData( url, args, username="xman", password="el33tnoob" ){
         dataType: "json",
         data: template,
         success: (data, textStatus, jqXHR) => {
+            console.timeEnd("ajaxRequest");
             printSpeed( jqXHR.getResponseHeader("Content-Length"), performance.now()-start );
             callback(data);
         },
         beforeSend: function (xhr) {
             xhr.setRequestHeader ("Authorization", "Basic " + btoa(username + ":" + password));
+            console.time("ajaxRequest")
         },
     });   
     
