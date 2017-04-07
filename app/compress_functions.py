@@ -13,7 +13,8 @@ def gzipped(f):
     def view_func(*args, **kwargs):
         @after_this_request
         def zipper(response):
-           return zipp(response)
+            
+            return zipp(response)
 
         return f(*args, **kwargs)
 
@@ -21,10 +22,9 @@ def gzipped(f):
 
 def zipp(response):
     """Compress a response"""
-    accept_encoding = request.headers.get('Accept-Encoding', '')
-
-    if 'gzip' not in accept_encoding.lower():
-        return response
+    #accept_encoding = request.headers.get('Accept-Encoding', '')
+    #if 'gzip' not in accept_encoding.lower():
+        #return response
 
     response.direct_passthrough = False
 
@@ -33,16 +33,30 @@ def zipp(response):
         'Content-Encoding' in response.headers):
 
         return response
+    
+    #compress the data
+    response.data = compressData(response.data)
+    
+    #add headers
+    response = addHeaders(response)
+    return response
 
-    gzip_buffer = IO()
-    gzip_file = gzip.GzipFile(mode='wb', 
-                              fileobj=gzip_buffer)
-    gzip_file.write(response.data)
-    gzip_file.close()
-
-    response.data = gzip_buffer.getvalue()
+def addHeaders(response):
+    """Add the headers to indicate the response is compressed"""
+    #add appropriate headers
     response.headers['Content-Encoding'] = 'gzip'
     response.headers['Vary'] = 'Accept-Encoding'
     response.headers['Content-Length'] = len(response.data)
-
     return response
+
+def compressData(  data ):
+    
+    gzip_buffer = IO()
+    gzip_file = gzip.GzipFile(mode='wb', fileobj=gzip_buffer)
+    gzip_file.write( data )
+    gzip_file.close()
+    
+    return gzip_buffer.getvalue()
+    
+
+

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import netCDF4 as nc
+import numpy as np
 from flask import send_from_directory, Response, request, jsonify, url_for, abort
 
 #import modules
@@ -57,40 +58,50 @@ def index(path):
 def jsonsql():
     """Return json data from the sql db. Login required. If 'gzip=true' in query, then the response will be compressed."""
     status = 200
-    output = {}
+    
+    start = time.time()
+    #store data in a string, which is correct json format
+    outputJson = getTableAsJson()
+    if (request.args.get("precomp")):
+        output = getCompressedTable()
+        r = Response( output, status=status,  content_type='application/json')
+        
+        #return with the appropriate headers
+        return compress_functions.addHeaders(r)
+    else:
+        r = Response( outputJson, status=status,  content_type='application/json')
+        
+        #if the request contains 'gzip' in the query, then compress them
+        if (request.args.get("gzip")):
+            return zipp(r)
+        return r
 
+def getCompressedTable(table="responses"):
+    """Get precompressed data"""
+    db = db_functions.get_db()
+    
+    result = db.execute("select data from responses limit ?", [1])
+    queryResult = result.fetchone()[0]
+    
+    return queryResult
+    
+def getTableAsJson(table="entries"):
+    """Get the specified table as a jsoned list of jsoned rows"""
     db = db_functions.get_db()
     
     #limit the number of rows to return
     limit = 75
-    
-    result = db.execute("select * from entries limit ?", [limit])
+        
+    result = db.execute("select date, z from entries limit ?", [limit])
     queryResult = result.fetchall()
     
-    #store data in a string, which is correct json format
+    #store data in json string
     outputJson = "["
-        
     for row in queryResult:
         outputJson += '{{ "z":{}, "yyyymmddhh":{} }},'.format( row[1], row[0] )
     outputJson = outputJson[0:-1] + "]"
     
-    r = Response( outputJson, status=status,  content_type='application/json')
-    
-    #if the request contains 'gzip' in the query, then compress them
-    if (request.args.get("gzip")):
-        return zipp(r)
-    return r
-
-@app.route('/oceanapp/v1.0/stream_sqrt')
-@auto.doc(groups=['public'])
-def stream():
-    def generate():
-        for i in range(500):
-            yield '{}\n'.format( sqrt(i) )
-            #sleep(.05)
-
-    return app.response_class(generate(), mimetype='text/plain')
-
+    return outputJson
 
 #Get data from .nc files
 @app.route('/oceanapp/v1.0/json/<date>', methods=['GET'])
@@ -158,6 +169,7 @@ def getData( end, start, fileName ):
     end = max( end, 1 )
      
     salts = {}
+
     for i in range( start, end ):
         salt = ds.variables['salt'][0, i, :, :].squeeze()
         salt = salt.tolist()

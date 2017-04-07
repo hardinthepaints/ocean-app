@@ -4,12 +4,14 @@
 from flask import g
 import os
 import sys
-from app import app, views
+from app import app, views, compress_functions
 from sqlite3 import dbapi2 as sqlite3
 import netCDF4 as nc
 import json
+from json import encoder
 import click
 
+compressData = compress_functions.compressData
 
 app.config.update(dict(
     DATABASE=os.path.join(app.root_path, 'app.db'),
@@ -41,6 +43,16 @@ def populate_db():
     """Populate the db with data from the 'ncfiles' folder"""
     db = get_db()
     ncFilesDir = "./app/ncFiles/"
+    
+    #control precision of floats when they are jsonified
+    #http://stackoverflow.com/questions/1447287/format-floats-with-standard-json-module/1447581
+    c_make_encoder = encoder.c_make_encoder
+    encoder.c_make_encoder = None
+    original = encoder.FLOAT_REPR
+    encoder.FLOAT_REPR = lambda o: format(o, '.2f')
+    
+    
+    #put the data in rows
     for root, dirs, files in os.walk(ncFilesDir, topdown=False):
         for name in dirs:
             yearString = name
@@ -54,15 +66,25 @@ def populate_db():
                     
                     if ( salt != None ):
                         date = yearString + name [ -5:-3 ]
+                        #print(type(salt[0][0]))
+                        #break
                         saltJSON = json.dumps(salt)
+                        
                         db.execute("insert into entries (date, z) values (?, ?)", [date, saltJSON] )
                         print(date)
+                db.commit()
+                data = views.getTableAsJson("entries")
+                db.execute("insert into responses (date, data) values (?, ?)", [yearString, compressData(data.encode('utf-8'))] )
+    
     db.commit()
+
     count = db.execute("select count(*) from entries")
-    print( "inserted {} into entries".format(count))
+    
+    #set back to original
+    encoder.FLOAT_REPR = original
+    encoder.c_make_encoder = c_make_encoder
 
-
-
+    print( "inserted {} into entries".format(count.fetchone()))
 
 @app.cli.command('initdb')
 def initdb_command():
