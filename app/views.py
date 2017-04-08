@@ -92,13 +92,16 @@ def getTableAsJson(table="entries"):
     #limit the number of rows to return
     limit = 75
         
-    result = db.execute("select date, z from entries limit ?", [limit])
+    result = db.execute("select date, z, ratio from entries limit ?", [limit])
     queryResult = result.fetchall()
     
     #store data in json string
     outputJson = "["
     for row in queryResult:
-        outputJson += '{{ "z":{}, "yyyymmddhh":{} }},'.format( row[1], row[0] )
+        if (row[2]):
+            outputJson += '{{ "z":{}, "yyyymmddhh":{}, "ratio":{} }},'.format( row[1], row[0], row[2] )
+        else:
+            outputJson += '{{ "z":{}, "yyyymmddhh":{} }},'.format( row[1], row[0] )
     outputJson = outputJson[0:-1] + "]"
     
     return outputJson
@@ -179,8 +182,64 @@ def getData( end, start, fileName ):
     ds.close()
     
     if ( len(salts) == 0 ): return None
-    elif ( len(salts) == 1): return salts[0]
+    elif ( len(salts) == 1): return salts[start]
     else: return salts
+    
+#flatten a 2 dimensional numpy array
+def flatten( numpy ):
+    return numpy.reshape( -1 )
+
+def getMin( target ):
+    return min( val for val in target)
+
+def getMax( target ):
+    return max( val for val in target)
+
+#glean the unique values in order from many repeating values
+def gleanUniqueValues( arr ):
+    dic = {}
+    out = []
+    for v in arr:
+        if v in dic:
+            pass
+        else:
+            dic[v] = True
+            out.append( v )
+    return out
+
+#given two arrays of values representing x and y values for a graph,
+#determine the ratio of the x axis to the y axis
+def getRatio( xvals, yvals ):
+    xlength = getMax(xvals) - getMin(xvals)
+    ylength = getMax(yvals) - getMin(yvals)
+    return float(xlength) / float(ylength)
+#open a .nc file and collect data
+#Return the specified number of layers
+def getAxisData(fileName):
+    """Returns a dict with keys 'lon', 'lat' and 'ratio'
+    which correspond to an array of longitudes, array of lats, and the axis aspect ratio"""
+    try:
+        ds = nc.Dataset( fileName )
+    except:
+        return None
+    
+    axisData = {}
+            
+    #longitude - east and west
+    lonp = ds.variables['lon_psi'][:]
+    lonp = flatten( lonp )
+    axisData[ 'lon' ] = gleanUniqueValues( lonp.tolist() )
+
+    #latitude - north or south
+    latp = ds.variables['lat_psi'][:]
+    latp = flatten(latp)
+    axisData[ 'lat' ] = gleanUniqueValues( latp.tolist() )
+    
+    #include the ratio of lon to lat
+    axisData['ratio'] = getRatio( lonp, latp )
+
+    return axisData
+
     
 #Error Handling    
 @app.errorhandler(404)

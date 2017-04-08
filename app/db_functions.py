@@ -58,40 +58,46 @@ def populate_db():
             yearString = name
             yearPath = ncFilesDir + name
             for root, dirs, files in os.walk( yearPath ):
+                first = True
                 for name in files:
                     
                     #print( ncFilesDir + name )
-
-                    salt = views.getData(1, 0, yearPath + "/" + name )
+                    fn = yearPath + "/" + name
+                    salt = views.getData(40, 39, fn )
                     
+
                     if ( salt != None ):
                         date = yearString + name [ -5:-3 ]
                         #print(type(salt[0][0]))
                         #break
                         saltJSON = json.dumps(salt)
                         
-                        db.execute("insert into entries (date, z) values (?, ?)", [date, saltJSON] )
-                        print(date)
+                        
+                        if(first):
+                            axisData = views.getAxisData(fn)
+                            db.execute("insert into entries (date, z, ratio) values (?, ?, ?)", [date, saltJSON, json.dumps(axisData['ratio'])] )
+                            first=False
+                        else:
+                            db.execute("insert into entries (date, z) values (?, ?)", [date, saltJSON] )
+
+
+                        #print(date)
                 db.commit()
                 data = views.getTableAsJson("entries")
                 db.execute("insert into responses (date, data) values (?, ?)", [yearString, compressData(data.encode('utf-8'))] )
     
     db.commit()
-
-    count = db.execute("select count(*) from entries")
     
     #set back to original
     encoder.FLOAT_REPR = original
     encoder.c_make_encoder = c_make_encoder
 
-    print( "inserted {} into entries".format(count.fetchone()))
-
 @app.cli.command('initdb')
 def initdb_command():
     """Creates the database tables."""
-    click.echo('Init the db')
+    #click.echo('Init the db')
     init_db()
-    print('Initialized the database.')
+    #print('Initialized the database.')
     populate_db()
     
 @app.cli.command('printrowcount')

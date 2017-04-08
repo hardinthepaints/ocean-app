@@ -21,11 +21,7 @@
 </head>
 <body>
     
-    <p>This is the latest output: <span id="latest"></span></p>
-    <p>This is all the output:</p>
-    <ul id="output"></ul>
-    
-    <div id="myDiv" align="center" ></div>
+    <div id="myDiv" align="center" style="position:absolute;"></div>
                 
     <script>
         
@@ -33,10 +29,14 @@
         
         var hm = new MyHeatmap("myDiv", 600)
         
+        function myCallback(json){
+            hm.initHeatmap(json)
+        }
         
-        //streamData("http://localhost:5000/oceanapp/v1.0/stream_sqrt", null )        
         /* Request data from the server and callback to the heatmap instance */
-        downloadData( url, {callback:hm.initHeatmap})
+        downloadData( url, {callback:myCallback, precomp:true})
+        
+
             
     </script>
 

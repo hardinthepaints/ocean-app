@@ -12,7 +12,10 @@ import sys
 #return yesterday's date in yyyymmdd form
 def getYesterdate():
     #get yesterday's date
-    return datetime.strftime(datetime.now() - timedelta(2), '%Y%m%d')
+    #return datetime.strftime(datetime.now() - timedelta(2), '%Y%m%d')
+    
+    #get a date
+    return "20170305"
     
 
 #numbers go from 0001 (1am utc) to 0073 (midnight 2 days later)
@@ -99,30 +102,38 @@ def downloadFile( url ):
                     
     return local_filename
 
-
+def getCurrentDirectory():
+    """Get the parent directory of this file. This makes it so the app will work, (and the db will be found)
+    no matter the current working directory."""
+    path = os.path.dirname(os.path.realpath(__file__))
+    return path +"/"
     
 def downloadYesterday():
     
     urls = getYesterdayURLs()
     
     #check if an item already exists (already downloaded)
+    original = len(urls)
     def itemNotDownloaded( item ):
-        if os.path.isfile(  "ncFiles/{}/{}".format( item[1], item[2] ) ):
+        if os.path.isfile( "{}ncFiles/{}/{}".format( getCurrentDirectory(), item[1], item[2] ) ):
             return False
         return True
     
     #filter out the files which already exists and don't need to be downloaded
     urls = list(filter( itemNotDownloaded, urls ))
     
+    print( "downloading {} of {}".format( len(urls), original ) )
+    
     date = getYesterdate()
     
-    ensure_dir( "ncFiles/{}/test.txt".format(date) )
+    ensure_dir( getCurrentDirectory() + "/ncFiles/{}/test.txt".format(date) )
     
     #creates a pool of n processes where n is cpu count
     #maps the indexes in urls to processes
     result = Pool().map(downloadFile, urls) # download 4 files at a time
-            
-downloadYesterday()
+  
+if __name__ == '__main__':
+    downloadYesterday()   
 
     
 

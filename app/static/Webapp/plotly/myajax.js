@@ -1,41 +1,5 @@
 
 
-function streamData(url, args, username="xman", password="el33tnoob" ){
-    var latest = document.getElementById('latest');
-    var output = document.getElementById('output');
-    
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', url);
-    xhr.send();
-    var position = 0;
-
-    function handleNewData() {
-        // the response text include the entire response so far
-        // split the messages, then take the messages that haven't been handled yet
-        // position tracks how many messages have been handled
-        // messages end with a newline, so split will always show one extra empty message at the end
-        var messages = xhr.responseText.split('\n');
-        messages.slice(position, -1).forEach(function(value) {
-            latest.textContent = value;  // update the latest value in place
-            // build and append a new item to a list to log all output
-            var item = document.createElement('li');
-            item.textContent = value;
-            output.appendChild(item);
-        });
-        position = messages.length - 1;
-    }
-
-    var timer;
-    timer = setInterval(function() {
-        // check the response for new data
-        handleNewData();
-        // stop checking once the response has ended
-        if (xhr.readyState == XMLHttpRequest.DONE) {
-            clearInterval(timer);
-            latest.textContent = 'Done';
-        }
-    }, 30);
-}
 
 function printSpeed( content_length, timeElapsed ){
     var size = "size: " + (content_length/(Math.pow(2,20))).toFixed(3) + " mb"
@@ -51,6 +15,7 @@ function downloadData( url, args, username="xman", password="el33tnoob" ){
     /* args as they pertain to the server
      * 'callback': the string name of the javascript function to call when this request is answered
      * 'gzip' if included, the response will be compressed
+     * 'precomp' response will be compressed, but from a pre-compressed source rather than zipped on the fly
     */
     
     /* Default args */

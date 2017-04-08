@@ -12,8 +12,6 @@ class MyHeatmap{
         this.bindEventListeners = this.bindEventListeners.bind( this )
         this.play = this.play.bind( this )
 
-
-
         /* define sliders */    
         this.sliders = [{
             pad: {t: 30},
@@ -52,9 +50,9 @@ class MyHeatmap{
                 name:'trace0',
                 connectgaps: false,
                 zsmooth:"fast",
-                zauto:false,
+                zauto:true,
                 /* zmin:15,
-                zmax:33,  */
+                zmax:33,*/
             }
         ];
         
@@ -73,7 +71,7 @@ class MyHeatmap{
         console.timeEnd("initHeatmap")
         
         console.time("addFrames")
-        this.addFrames( json.slice(1) )
+        this.addFrames( json.slice(0) )
         console.timeEnd("addFrames")
 
         
@@ -85,11 +83,35 @@ class MyHeatmap{
     /* Play through the frames */
     play(){
         
-        frames = Array.apply(null, Array(71)).map(function (_, i) {return i;});
-
-        
+        const frameCount = this.frameCount;
+        frames = Array.apply(null, Array(10000)).map(function (_, i) {return i % frameCount ;});
+        //Plotly.animate(this.div, [], {mode: 'next'});
         /* Begin with initial animation */
-        Plotly.animate(this.div, frames, updatemenus[0]['buttons'][0]['args'][1]);
+        
+        var settings =  {
+          "transition": {
+            "duration": 0
+          },
+          "frame": {
+            "duration": 0,
+            "redraw": false
+          }
+        }
+        Plotly.animate(this.div, frames, settings);
+        
+        //console.log(this.frames)
+    }
+    
+    /* Format frame data from the server so plotly can interpret */
+    formatFrame( frame, key ){
+            return {
+                name: "" + key,
+                data: [{
+                    z: frame.z,
+                }],
+                traces: [0],
+            };       
+        
     }
     
     /* Add frames to the plot and animate */
@@ -98,22 +120,21 @@ class MyHeatmap{
         /* Make the frames to animate */        
         var processedFrames = [];
         
+        const formatFrame = this.formatFrame;
+        
         //Object.keys( json.frames ).map( function( key, index ){
         json.map( function( frame, key ){
           
-            processedFrames.push( {
-                name: "" + key,
-                data: [{
-                    z: frame.z,
-                }],
-                traces: [0],
-            } );
+            processedFrames.push( formatFrame(frame, key) );
         });
         
         /* Add and animate frames */
         Plotly.addFrames( this.div, processedFrames );
+        
+        this.frameCount = processedFrames.length;
+        //this.frames = processedFrames
         this.play();
-             
+    
     }
     
     /* Bind plotly event listeners*/
@@ -141,11 +162,6 @@ class MyHeatmap{
         myPlot.on('plotly_relayout', function(data){
             console.log("relayout traces:" );
         });
-        
-        function loop(data) {
-            console.log("animated " + stringify( plotData ));
-            console.log( "this:" + Object.keys( this ) );
-        }
         
         /* No data provided */
         myPlot.on('plotly_animated', this.play);
