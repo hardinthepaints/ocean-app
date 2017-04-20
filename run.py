@@ -10,9 +10,9 @@ extra_files = [basePath.format("plotly_test.html"), basePath.format("myajax.js")
 
 #run in debug mode if in args
 if ( "-d" in sys.argv ):
-    app.run( debug=True, extra_files=[] )
+    app.run( debug=True, extra_files=[], threaded=True )
 else:
-    app.run( debug=False )
+    app.run( debug=False, threaded=True )
 
 
 

@@ -14,7 +14,7 @@ import click
 compressData = compress_functions.compressData
 
 app.config.update(dict(
-    DATABASE=os.path.join(app.root_path, 'app.db'),
+    DATABASE=os.path.join(app.root_path, 'db/app.db'),
 ))
 
 def connect_db():
@@ -30,7 +30,7 @@ def setcwd(path):
 def init_db():
     """Initializes the database."""
     db = get_db()
-    with app.open_resource('schema.sql', mode='r') as f:
+    with app.open_resource('db/schema.sql', mode='r') as f:
         db.cursor().executescript(f.read())
     db.commit()
 

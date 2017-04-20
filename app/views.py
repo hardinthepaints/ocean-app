@@ -64,8 +64,7 @@ def jsonsql():
     outputJson = getTableAsJson()
     if (request.args.get("precomp")):
         output = getCompressedTable()
-        r = Response( output, status=status,  content_type='application/json')
-        
+        r = Response( output, status=status,  content_type='application/json')        
         #return with the appropriate headers
         return compress_functions.addHeaders(r)
     else:

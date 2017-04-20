@@ -58,6 +58,7 @@ class FlaskrTestCase(unittest.TestCase):
     def setUp(self):
         """setup client testing"""
         self.app = app.test_client()
+        app.config["DEBUG"] = True
         #self.context = flask.Flask(__name__)        
 
     def tearDown(self):

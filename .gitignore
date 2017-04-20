@@ -3,6 +3,7 @@ app/static/webapp/react-ocean-app
 app.db
 app/tests
 app/viewsB.py
+profiles/
 
 # Compiled source #
 ###################
