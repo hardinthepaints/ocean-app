@@ -18,20 +18,11 @@ def getParentDirectory():
 #according to documentation it is necesary to define the root path
 app = Flask(__name__, root_path = getParentDirectory() )
 
+
 #activate cross origin requests
 cors = CORS( app )
 
-#from werkzeug.contrib.profiler import ProfilerMiddleware, MergeStream
-
-#activate profiling
-#f = open(getParentDirectory()+'/profiles/profiler.log', 'w')
-#stream = MergeStream(sys.stdout, f, )
-#app.wsgi_app = ProfilerMiddleware(app.wsgi_app, stream, profile_dir=(getParentDirectory()+"/profiles"))
-                                  #, stream, profile_dir=(getParentDirectory()+"/profiles"))
-
-
-
 #imports 'views' --at end of file to avoid circular refs
-from app import views, db_functions
+from app import views
 
 

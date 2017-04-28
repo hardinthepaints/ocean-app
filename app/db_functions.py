@@ -4,40 +4,49 @@
 from flask import g
 import os
 import sys
-from app import app, views, compress_functions
+from app import app, views, compress_functions, netcdf_functions
 from sqlite3 import dbapi2 as sqlite3
 import netCDF4 as nc
 import json
 from json import encoder
 import click
+from flask_redis import FlaskRedis
+import inspect 
+
+all_functions = inspect.getmembers(FlaskRedis, inspect.isfunction)
+
+
+
+app.config.update(dict(
+    REDIS_URL="redis://localhost:6379/0"
+))
+
+redis_store = FlaskRedis(app, decode_responses=True)
 
 compressData = compress_functions.compressData
 
-app.config.update(dict(
-    DATABASE=os.path.join(app.root_path, 'db/app.db'),
-))
 
 def connect_db():
     """Connects to the specific database."""
-    rv = sqlite3.connect(app.config['DATABASE'])
-    rv.row_factory = sqlite3.Row
-    return rv
+    #rv = sqlite3.connect(app.config['DATABASE'])
+    #rv.row_factory = sqlite3.Row
+    return redis_store
 
 def setcwd(path):
     '''set the current working directory to the path'''    
     os.chdir(path)
 
 def init_db():
-    """Initializes the database."""
+    """Initializes the database"""
     db = get_db()
-    with app.open_resource('db/schema.sql', mode='r') as f:
-        db.cursor().executescript(f.read())
-    db.commit()
+    #with app.open_resource('db/schema.sql', mode='r') as f:
+        #db.cursor().executescript(f.read())
+    #db.commit()
 
 def get_all_entries():
     db = get_db()
-    cur = db.execute('select date from entries order by date desc')
-    return cur.fetchall()
+    #cur = db.execute('select date from entries order by date desc')
+    return db.keys()
 
 def populate_db():
     """Populate the db with data from the 'ncfiles' folder"""
@@ -51,7 +60,6 @@ def populate_db():
     original = encoder.FLOAT_REPR
     encoder.FLOAT_REPR = lambda o: format(o, '.2f')
     
-    
     #put the data in rows
     for root, dirs, files in os.walk(ncFilesDir, topdown=False):
         for name in dirs:
@@ -59,34 +67,40 @@ def populate_db():
             yearPath = ncFilesDir + name
             for root, dirs, files in os.walk( yearPath ):
                 first = True
+                frames = []
                 for name in files:
                     
-                    #print( ncFilesDir + name )
+                    #get the top level of salt data in the file
                     fn = yearPath + "/" + name
-                    salt = views.getData(40, 39, fn )
+                    salt = netcdf_functions.getData(40, 39, fn )
                     
-
+                    #assert salt != None, "Error, data from fn {} is None".format(fn)
+                    
                     if ( salt != None ):
                         date = yearString + name [ -5:-3 ]
-                        #print(type(salt[0][0]))
-                        #break
                         saltJSON = json.dumps(salt)
                         
-                        
+                        frame = {}
                         if(first):
-                            axisData = views.getAxisData(fn)
-                            db.execute("insert into entries (date, z, ratio) values (?, ?, ?)", [date, saltJSON, json.dumps(axisData['ratio'])] )
-                            first=False
-                        else:
-                            db.execute("insert into entries (date, z) values (?, ?)", [date, saltJSON] )
+                            first = False
+                            axisData = netcdf_functions.getAxisData(fn)
+                            #db.execute("insert into entries (date, z, ratio, lon, lat) values (?, ?, ?, ?, ?)", [date, saltJSON, json.dumps(axisData['ratio']), json.dumps(axisData['lon']), json.dumps(axisData['lat'])] )
+                            frame.update({"ratio":json.dumps(axisData['ratio']), "lon":json.dumps(axisData['lon']), "lat":json.dumps(axisData['lat'])})
+                                        
+                        #add in the z data                
+                        frame.update({"yyyymmddhh":date, "z":saltJSON})
+                        frames.append(frame)
 
 
                         #print(date)
-                db.commit()
-                data = views.getTableAsJson("entries")
-                db.execute("insert into responses (date, data) values (?, ?)", [yearString, compressData(data.encode('utf-8'))] )
+                #db.commit()
+                #data = getTableAsJson("entries")
+                db.set("frames", json.dumps(frames))
+
+                db.set("framesCompressed", compressData(json.dumps(frames).encode('utf-8')))
+                #db.execute("insert into responses (date, data) values (?, ?)", [yearString, compressData(data.encode('utf-8'))] )
     
-    db.commit()
+    #db.commit()
     
     #set back to original
     encoder.FLOAT_REPR = original
@@ -117,13 +131,28 @@ def get_db():
     """Opens a new database connection if there is none yet for the
     current application context.
     """
-    if not hasattr(g, 'sqlite_db'):
-        g.sqlite_db = connect_db()
-    return g.sqlite_db
+    #if not hasattr(g, 'sqlite_db'):
+        #g.sqlite_db = connect_db()
+    #return g.sqlite_db
+    return redis_store
+
 
 
 @app.teardown_appcontext
 def close_db(error):
     """Closes the database again at the end of the request."""
-    if hasattr(g, 'sqlite_db'):
-        g.sqlite_db.close()
+    #if hasattr(g, 'sqlite_db'):
+        #g.sqlite_db.close()
+        
+        
+def getCompressedTable(table="responses"):
+    """Get precompressed data"""
+    db = get_db()
+    
+    return db.get("framesCompressed")
+    
+def getTableAsJson(table="entries"):
+    """Get the specified table as a jsoned list of jsoned rows"""
+    db = get_db()
+    return db.get("frames")
+

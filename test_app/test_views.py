@@ -8,7 +8,8 @@ import json
 #allow to import packages in parent directory
 sys.path.append('../')
 
-from app import app
+from app import app, views
+
 import unittest
 import tempfile
 import json
@@ -138,10 +139,18 @@ class FlaskrTestCase(unittest.TestCase):
             last = 0
             
             assert len(result) == 72, "Expected 72 frames but got {}".format(str(len(result)))
+            
+            
+            #print ("result: " + str(result))
+            
+            
             for row in result:
+                
+                for attrib in ["yyyymmddhh", 'z']:
+                    assert attrib in row, "arribute '{}' not found in row".format(attrib)
+            
                 curr = int(row['yyyymmddhh'] )
                 assert last < curr
-                assert "z","yyyymmddhh" in row
                 last = curr
             results.append(result)
         
@@ -149,17 +158,6 @@ class FlaskrTestCase(unittest.TestCase):
         assert sizes[possible_params[0]] > sizes[possible_params[1]] == sizes[possible_params[2]]
         assert results[0] == results[1]
         assert results[1] == results[2]
-        
-        
-    #def test_encoder(self):
-    #    x = [float(1.0002442),float(7.0002442),float(4.0002442)]
-    #    print(x)
-    #    jsonencoder = app.json_encoder
-    #    print(jsonencoder.default(jsonencoder, x))
-    #    
-    #    #json.dumps(x)
-        
-        
 
     #NONEXISTENT ENDPOINTS
     def test_notfound(self):
@@ -203,6 +201,35 @@ class FlaskrTestCase(unittest.TestCase):
         assert jsonObj != None
         assert ERROR_KEY in jsonObj
         assert "404" in jsonObj[ERROR_KEY]
+
+class ViewsTest(unittest.TestCase):
+    """test the functions in views.py which do not require a context"""
+    
+    def setUp(self):
+        """setup client testing"""
+        self.app = app
+        #app.config["DEBUG"] = True
+        #self.context = flask.Flask(__name__)        
+
+    def tearDown(self):
+        """End client testing"""
+        #os.close(self.db_fd)
+        #os.unlink(app.config['DATABASE'])
+        pass
+    
+    #REAL ENDPOINTS
+    def test_hourIsReal(self):
+        
+        assert views.hourIsReal( 9 )
+        assert not views.hourIsReal( 73 )
+        assert not views.hourIsReal( 1 )
+        assert not views.hourIsReal( "hey" )
+    def test_getInt(self):
+        
+        assert views.getInt( "9" ) == 9
+        assert views.getInt( "9da" ) == None
+        assert views.getInt( "-13144" ) == -13144        
+    
     
 if __name__ == '__main__':
     unittest.main()

@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 
-import netCDF4 as nc
-import numpy as np
 from flask import send_from_directory, Response, request, jsonify, url_for, abort
 
 #import modules
-from app import app, db_functions, auth_functions, compress_functions
+from app import app, db_functions, auth_functions, compress_functions, netcdf_functions
 gzipped = compress_functions.gzipped
 zipp = compress_functions.zipp
 auth = auth_functions.auth
+getTableAsJson = db_functions.getTableAsJson
+getCompressedTable = db_functions.getCompressedTable
 
 import os
 import json as JSON
@@ -31,18 +31,6 @@ auto = Autodoc(app)
 
 app.config['dataFN'] = 'app/static/ocean_his_0002.nc'
 
-
-def add_header(r):
-    """
-    Add headers to both force latest IE rendering engine or Chrome Frame,
-    and also to cache the rendered page for 10 minutes.
-    """
-    r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    r.headers["Pragma"] = "no-cache"
-    r.headers["Expires"] = "0"
-    r.headers['Cache-Control'] = 'public, max-age=0'
-    return r
-
 #Index - uncomment to make active endpoint
 @app.route('/oceanapp/v1.0/app/static/<path:path>', methods=['GET'])
 @auto.doc(groups=['private', 'public'])
@@ -61,13 +49,15 @@ def jsonsql():
     
     start = time.time()
     #store data in a string, which is correct json format
-    outputJson = getTableAsJson()
     if (request.args.get("precomp")):
         output = getCompressedTable()
         r = Response( output, status=status,  content_type='application/json')        
         #return with the appropriate headers
         return compress_functions.addHeaders(r)
     else:
+        outputJson = getTableAsJson()
+
+        
         r = Response( outputJson, status=status,  content_type='application/json')
         
         #if the request contains 'gzip' in the query, then compress them
@@ -75,42 +65,13 @@ def jsonsql():
             return zipp(r)
         return r
 
-def getCompressedTable(table="responses"):
-    """Get precompressed data"""
-    db = db_functions.get_db()
-    
-    result = db.execute("select data from responses limit ?", [1])
-    queryResult = result.fetchone()[0]
-    
-    return queryResult
-    
-def getTableAsJson(table="entries"):
-    """Get the specified table as a jsoned list of jsoned rows"""
-    db = db_functions.get_db()
-    
-    #limit the number of rows to return
-    limit = 75
-        
-    result = db.execute("select date, z, ratio from entries limit ?", [limit])
-    queryResult = result.fetchall()
-    
-    #store data in json string
-    outputJson = "["
-    for row in queryResult:
-        if (row[2]):
-            outputJson += '{{ "z":{}, "yyyymmddhh":{}, "ratio":{} }},'.format( row[1], row[0], row[2] )
-        else:
-            outputJson += '{{ "z":{}, "yyyymmddhh":{} }},'.format( row[1], row[0] )
-    outputJson = outputJson[0:-1] + "]"
-    
-    return outputJson
 
 #Get data from .nc files
 @app.route('/oceanapp/v1.0/json/<date>', methods=['GET'])
 @auto.doc(groups=['private', 'public'])
 @cross_origin(allow_headers="*")
 def json(date):
-    """Return json data based on params, queried from netCDF files. The date arguement should be in yyyymmdd format."""
+    """Return json data based on params, queried from netCDF files. The date argument should be in yyyymmdd format. """
     date=str(date)
     status = 200
         
@@ -143,102 +104,22 @@ def json(date):
     for key in frames.keys():
         if (frames[ key ] != None):
             identity = frames[key]['id']
-            frames[ key ]['z'] = getDataByHour(date, identity) 
+            frames[ key ]['z'] = netcdf_functions.getDataByHour(date, identity) 
     
     output["hoursData"] = frames
 
-        
     return jsonify( output ), status
 
-def getDataByHour(date, hour):
-    """Get the top layer of salinity data for the given date and hour"""
-    fileName = "app/ncFiles/{}/ocean_his_{}.nc".format( date, hour )
-    return getData(1, 0, fileName)
-
-
-#open a .nc file and collect data
-#Return the specified number of layers
-def getData( end, start, fileName ):
-    """Get the given range of layers of salinity from the given .nc file. If the range only includes one layer, return None"""
-    
-    try:
-        ds = nc.Dataset( fileName )
-    except:
-        return None
-    
-    #ensure the layers correspond to correct indexes
-    end = min( end, len( ds.variables['salt'][0]) )
-    end = max( end, 1 )
-     
-    salts = {}
-
-    for i in range( start, end ):
-        salt = ds.variables['salt'][0, i, :, :].squeeze()
-        salt = salt.tolist()
-        salts[i] = salt
-    
-    #close the dataset
-    ds.close()
-    
-    if ( len(salts) == 0 ): return None
-    elif ( len(salts) == 1): return salts[start]
-    else: return salts
-    
-#flatten a 2 dimensional numpy array
-def flatten( numpy ):
-    return numpy.reshape( -1 )
-
-def getMin( target ):
-    return min( val for val in target)
-
-def getMax( target ):
-    return max( val for val in target)
-
-#glean the unique values in order from many repeating values
-def gleanUniqueValues( arr ):
-    dic = {}
-    out = []
-    for v in arr:
-        if v in dic:
-            pass
-        else:
-            dic[v] = True
-            out.append( v )
-    return out
-
-#given two arrays of values representing x and y values for a graph,
-#determine the ratio of the x axis to the y axis
-def getRatio( xvals, yvals ):
-    xlength = getMax(xvals) - getMin(xvals)
-    ylength = getMax(yvals) - getMin(yvals)
-    return float(xlength) / float(ylength)
-#open a .nc file and collect data
-#Return the specified number of layers
-def getAxisData(fileName):
-    """Returns a dict with keys 'lon', 'lat' and 'ratio'
-    which correspond to an array of longitudes, array of lats, and the axis aspect ratio"""
-    try:
-        ds = nc.Dataset( fileName )
-    except:
-        return None
-    
-    axisData = {}
-            
-    #longitude - east and west
-    lonp = ds.variables['lon_psi'][:]
-    lonp = flatten( lonp )
-    axisData[ 'lon' ] = gleanUniqueValues( lonp.tolist() )
-
-    #latitude - north or south
-    latp = ds.variables['lat_psi'][:]
-    latp = flatten(latp)
-    axisData[ 'lat' ] = gleanUniqueValues( latp.tolist() )
-    
-    #include the ratio of lon to lat
-    axisData['ratio'] = getRatio( lonp, latp )
-
-    return axisData
-
+def add_header(r):
+    """
+    Add headers to both force latest IE rendering engine or Chrome Frame,
+    and also to cache the rendered page for 10 minutes.
+    """
+    r.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    r.headers["Pragma"] = "no-cache"
+    r.headers["Expires"] = "0"
+    r.headers['Cache-Control'] = 'public, max-age=0'
+    return r
     
 #Error Handling    
 @app.errorhandler(404)
