@@ -43,6 +43,15 @@ class DatabaseTestCase(unittest.TestCase):
             entries = db_functions.get_all_entries()
             
             assert len(entries[b"framesCompressed"]) < len(entries[b"frames"])
+                
+    def test_get_db(self):
+        with app.app_context():
+            
+            db = db_functions.get_db()
+            
+            print(db)
+            
+            #assert len(entries[b"framesCompressed"]) < len(entries[b"frames"])
             
             
     
