@@ -148,6 +148,17 @@ class FlaskrTestCase(unittest.TestCase):
                 
                 for attrib in ["yyyymmddhh", 'z']:
                     assert attrib in row, "arribute '{}' not found in row".format(attrib)
+                    
+                
+                expectedtype = type([])
+                actual = type(row['z'])
+                assert actual is expectedtype, "Wrong type. expected {} but got {}.".format( expectedtype, actual )
+                
+                
+                expectedtype = type("")
+                actual = type(row['yyyymmddhh'])
+                assert actual is expectedtype, "Wrong type. expected {} but got {}.".format( expectedtype, actual )  
+
             
                 curr = int(row['yyyymmddhh'] )
                 assert last < curr

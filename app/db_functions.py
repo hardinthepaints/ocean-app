@@ -72,20 +72,19 @@ def populate_db():
                                         
                     if ( salt != None ):
                         date = yearString + name [ -5:-3 ]
-                        saltJSON = json.dumps(salt)
                         
                         frame = {}
                         if(first):
                             first = False
                             axisData = netcdf_functions.getAxisData(fn)
                             #db.execute("insert into entries (date, z, ratio, lon, lat) values (?, ?, ?, ?, ?)", [date, saltJSON, json.dumps(axisData['ratio']), json.dumps(axisData['lon']), json.dumps(axisData['lat'])] )
-                            frame.update({"ratio":json.dumps(axisData['ratio']), "lon":json.dumps(axisData['lon']), "lat":json.dumps(axisData['lat'])})
+                            frame.update({"ratio":axisData['ratio'], "lon":axisData['lon'], "lat":axisData['lat']})
                                         
                         #add in the z data                
-                        frame.update({"yyyymmddhh":date, "z":saltJSON})
+                        frame.update({"yyyymmddhh":date, "z":salt})
                         frames.append(frame)
 
-                #commit the frames both as compressed and not compressed
+                #commit the frames both as compressed and not compressed, in json format
                 db.set("frames", json.dumps(frames))
                 db.set("framesCompressed", compressData(json.dumps(frames).encode('utf-8')))
     
