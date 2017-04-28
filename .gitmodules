@@ -1,0 +1,3 @@
+[submodule "app/static/Webapp/react-ocean-app"]
+	path = app/static/Webapp/react-ocean-app
+	url = https://github.com/hardinthepaints/react-ocean-app
