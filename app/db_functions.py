@@ -1,7 +1,6 @@
 
 """Functions to handle creation, population, and access of sqlite database."""
 
-from flask import g
 import os
 import sys
 from app import app, views, compress_functions, netcdf_functions
@@ -9,19 +8,13 @@ from sqlite3 import dbapi2 as sqlite3
 import netCDF4 as nc
 import json
 from json import encoder
-import click
 from flask_redis import FlaskRedis
-import inspect 
-
-all_functions = inspect.getmembers(FlaskRedis, inspect.isfunction)
-
-
 
 app.config.update(dict(
     REDIS_URL="redis://localhost:6379/0"
 ))
 
-redis_store = FlaskRedis(app, decode_responses=True)
+redis_store = FlaskRedis(app, decode_responses=False)
 
 compressData = compress_functions.compressData
 
@@ -39,13 +32,16 @@ def setcwd(path):
 def init_db():
     """Initializes the database"""
     db = get_db()
-    #with app.open_resource('db/schema.sql', mode='r') as f:
-        #db.cursor().executescript(f.read())
-    #db.commit()
 
 def get_all_entries():
     db = get_db()
-    #cur = db.execute('select date from entries order by date desc')
+    out = {}
+    for key in db.keys():
+        out[key] = db.get(key)
+        
+    return out
+def get_keys():
+    db = get_db()
     return db.keys()
 
 def populate_db():
@@ -73,9 +69,7 @@ def populate_db():
                     #get the top level of salt data in the file
                     fn = yearPath + "/" + name
                     salt = netcdf_functions.getData(40, 39, fn )
-                    
-                    #assert salt != None, "Error, data from fn {} is None".format(fn)
-                    
+                                        
                     if ( salt != None ):
                         date = yearString + name [ -5:-3 ]
                         saltJSON = json.dumps(salt)
@@ -91,16 +85,10 @@ def populate_db():
                         frame.update({"yyyymmddhh":date, "z":saltJSON})
                         frames.append(frame)
 
-
-                        #print(date)
-                #db.commit()
-                #data = getTableAsJson("entries")
+                #commit the frames both as compressed and not compressed
                 db.set("frames", json.dumps(frames))
-
                 db.set("framesCompressed", compressData(json.dumps(frames).encode('utf-8')))
-                #db.execute("insert into responses (date, data) values (?, ?)", [yearString, compressData(data.encode('utf-8'))] )
     
-    #db.commit()
     
     #set back to original
     encoder.FLOAT_REPR = original
@@ -109,9 +97,7 @@ def populate_db():
 @app.cli.command('initdb')
 def initdb_command():
     """Creates the database tables."""
-    #click.echo('Init the db')
     init_db()
-    #print('Initialized the database.')
     populate_db()
     
 @app.cli.command('printrowcount')
@@ -131,22 +117,15 @@ def get_db():
     """Opens a new database connection if there is none yet for the
     current application context.
     """
-    #if not hasattr(g, 'sqlite_db'):
-        #g.sqlite_db = connect_db()
-    #return g.sqlite_db
     return redis_store
-
-
 
 @app.teardown_appcontext
 def close_db(error):
     """Closes the database again at the end of the request."""
-    #if hasattr(g, 'sqlite_db'):
-        #g.sqlite_db.close()
+
         
-        
-def getCompressedTable(table="responses"):
-    """Get precompressed data"""
+def getCompressedTable():
+    """Get the precompressed data"""
     db = get_db()
     
     return db.get("framesCompressed")

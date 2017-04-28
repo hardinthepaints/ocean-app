@@ -27,10 +27,24 @@ class DatabaseTestCase(unittest.TestCase):
         #os.unlink(app.config['DATABASE'])
         pass
     
+    def test_get_keys(self):
+        with app.app_context():
+            
+            entries = db_functions.get_keys()
+            for entry in entries:
+                entry = entry.decode('utf-8')
+                expectedEntries = ["frames", "framesCompressed"]
+                assert entry in expectedEntries, "entries {} not in {}".format(entry, expectedEntries)
+            assert len(entries) == 2, "Unexpected number of entries"
+            
     def test_get_all_entries(self):
         with app.app_context():
             
-            print( db_functions.get_all_entries() )
+            entries = db_functions.get_all_entries()
+            
+            assert len(entries[b"framesCompressed"]) < len(entries[b"frames"])
+            
+            
     
 if __name__ == '__main__':
     unittest.main()
