@@ -15,7 +15,7 @@ def getYesterdate():
     #return datetime.strftime(datetime.now() - timedelta(2), '%Y%m%d')
     
     #get a date
-    return "20170305"
+    return "20170306"
     
 
 #numbers go from 0001 (1am utc) to 0073 (midnight 2 days later)
