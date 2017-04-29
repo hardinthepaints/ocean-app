@@ -69,8 +69,16 @@ def populate_db():
                     #get the top level of salt data in the file
                     fn = yearPath + "/" + name
                     salt = netcdf_functions.getData(40, 39, fn )
+                    
                                         
                     if ( salt != None ):
+                        width = len(salt[0])
+                        height = len(salt)
+                        
+                        #reverse the array and flatten
+                        salt = reversed(salt)
+                        salt = sum(salt, [])
+
                         date = yearString + name [ -5:-3 ]
                         
                         frame = {}
@@ -78,7 +86,7 @@ def populate_db():
                             first = False
                             axisData = netcdf_functions.getAxisData(fn)
                             #db.execute("insert into entries (date, z, ratio, lon, lat) values (?, ?, ?, ?, ?)", [date, saltJSON, json.dumps(axisData['ratio']), json.dumps(axisData['lon']), json.dumps(axisData['lat'])] )
-                            frame.update({"ratio":axisData['ratio'], "lon":axisData['lon'], "lat":axisData['lat']})
+                            frame.update({"ratio":axisData['ratio'], "lon":axisData['lon'], "lat":axisData['lat'], "width":width, "height":height})
                                         
                         #add in the z data                
                         frame.update({"yyyymmddhh":date, "z":salt})
