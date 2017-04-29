@@ -75,8 +75,6 @@ def getRatio( xvals, yvals ):
     ylength = float(getMax(yvals)) - getMin(yvals)
     return float(xlength) / float(ylength)
 
-    #return .79
-
 def trimPerimeter(arr):
     out = arr[0:-1]
     for i in range(len(out) ):
@@ -111,23 +109,13 @@ def getAxisData(fileName):
     def prepareAxis(axis):
         
         axis = axis.tolist()
-        #axis = trimPerimeter(axis)
         axis = sum(axis,[])
         axis = gleanUniqueValues(axis)
         return axis
         
     lonp = prepareAxis(lonp)
     latp = prepareAxis(latp)
-    #salt = getData(1, 0, fileName)
 
-    #for i in range(len( salt)):
-        #if (salt[i] == None):
-            #lonp[i] = None
-            #latp[i] = None
-            #pass
-            
-    #lonp = removeNones(lonp)
-    #latp = removeNones(latp)
         
     axisData['lon'] = lonp
     axisData['lat'] = latp
