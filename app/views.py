@@ -149,6 +149,7 @@ def getInt( value ):
     except ValueError:
         return None
     
+    
 def hourIsReal( hour ):
     """Check if the hour is a real hour in our dataset"""
     hour = getInt( hour )
