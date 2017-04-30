@@ -3,7 +3,8 @@
 from flask import send_from_directory, Response, request, jsonify, url_for, abort
 
 #import modules
-from app import app, db_functions, auth_functions, compress_functions, netcdf_functions
+from app import app, auth_functions, compress_functions
+from app.db import db_functions
 gzipped = compress_functions.gzipped
 zipp = compress_functions.zipp
 auth = auth_functions.auth
@@ -39,76 +40,22 @@ def index(path):
     return add_header( send_from_directory( directory, path) )
 
 #Get data from the sql db.
-@app.route('/oceanapp/v1.0/jsonsql', methods=['GET'])
+@app.route('/oceanapp/v1.0/json', methods=['GET'])
 @auto.doc(groups=['private', 'public'])
 @cross_origin(allow_headers="*", expose_headers="Content-length")
 @auth.login_required
-def jsonsql():
+def json():
     """Return json data from the sql db. Login required. If 'gzip=true' in query, then the response will be compressed."""
     status = 200
     
     start = time.time()
+    
     #store data in a string, which is correct json format
-    if (request.args.get("precomp")):
-        output = getCompressedTable()
-        r = Response( output, status=status,  content_type='application/json')        
-        #return with the appropriate headers
-        return compress_functions.addHeaders(r)
-    else:
-        outputJson = getTableAsJson()
+    output = getCompressedTable()
+    r = Response( output, status=status,  content_type='application/json')        
+    #return with the appropriate headers
+    return compress_functions.addHeaders(r)
 
-        
-        r = Response( outputJson, status=status,  content_type='application/json')
-        
-        #if the request contains 'gzip' in the query, then compress them
-        if (request.args.get("gzip")):
-            return zipp(r)
-        return r
-
-
-#Get data from .nc files
-@app.route('/oceanapp/v1.0/json/<date>', methods=['GET'])
-@auto.doc(groups=['private', 'public'])
-@cross_origin(allow_headers="*")
-def json(date):
-    """Return json data based on params, queried from netCDF files. The date argument should be in yyyymmdd format. """
-    date=str(date)
-    status = 200
-        
-    args = request.args
-    
-    try:
-        hours = args.getlist("hours")
-        if (len(hours) == 0): abort(404)
-    except:
-        abort(404)
-        
-    output = { "url":url_for('json', date=date, hours=args.getlist("hours"), _external=True)}
-    
-    frames = {}
-    def checkHour(hour):
-        
-        #key format yyyymmddhh
-        key = date + hour.zfill(2)
-        if ( hourIsReal(hour)):
-            frames[ key ] = {"id":hour.zfill(4)}
-        else:
-            pass
-            #frames[ key ] = None
-    
-        
-    for val in hours:
-        checkHour(val)    
-        
-    
-    for key in frames.keys():
-        if (frames[ key ] != None):
-            identity = frames[key]['id']
-            frames[ key ]['z'] = netcdf_functions.getDataByHour(date, identity) 
-    
-    output["hoursData"] = frames
-
-    return jsonify( output ), status
 
 def add_header(r):
     """
@@ -141,23 +88,6 @@ def private_doc():
     """Display documentation for how to use this api and private functions"""
     return auto.html(groups=['private'], title='Ocean App Web Service Private Documentation')
 
-#HELPER FUNCTIONS
-def getInt( value ):
-    """Attempt to convert to an int and if fail then return None"""
-    try:
-        return int(value)
-    except ValueError:
-        return None
-    
-    
-def hourIsReal( hour ):
-    """Check if the hour is a real hour in our dataset"""
-    hour = getInt( hour )
-    if hour == None:
-        return False
-    if hour not in range(2, 73):
-        return False
-    return True
 
 
             

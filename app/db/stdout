@@ -1,0 +1,110 @@
+2884:M 29 Apr 09:45:37.003 * Increased maximum number of open files to 10032 (it was originally set to 256).
+                _._                                                  
+           _.-``__ ''-._                                             
+      _.-``    `.  `_.  ''-._           Redis 3.2.8 (f2d1eb3c/1) 64 bit
+  .-`` .-```.  ```\/    _.,_ ''-._                                   
+ (    '      ,       .-`  | `,    )     Running in standalone mode
+ |`-._`-...-` __...-.``-._|'` _.-'|     Port: 6379
+ |    `-._   `._    /     _.-'    |     PID: 2884
+  `-._    `-._  `-./  _.-'    _.-'                                   
+ |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+ |    `-._`-._        _.-'_.-'    |           http://redis.io        
+  `-._    `-._`-.__.-'_.-'    _.-'                                   
+ |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+ |    `-._`-._        _.-'_.-'    |                                  
+  `-._    `-._`-.__.-'_.-'    _.-'                                   
+      `-._    `-.__.-'    _.-'                                       
+          `-._        _.-'                                           
+              `-.__.-'                                               
+
+2884:M 29 Apr 09:45:37.177 # Server started, Redis version 3.2.8
+2884:M 29 Apr 09:45:37.380 * DB loaded from disk: 0.202 seconds
+2884:M 29 Apr 09:45:37.380 * The server is now ready to accept connections on port 6379
+2884:signal-handler (1493484339) Received SIGINT scheduling shutdown...
+2884:M 29 Apr 09:45:39.149 # User requested shutdown...
+2884:M 29 Apr 09:45:39.149 * Saving the final RDB snapshot before exiting.
+2884:M 29 Apr 09:45:39.408 * DB saved on disk
+2884:M 29 Apr 09:45:39.408 * Removing the pid file.
+2884:M 29 Apr 09:45:39.408 # Redis is now ready to exit, bye bye...
+2885:M 29 Apr 09:45:43.684 * Increased maximum number of open files to 10032 (it was originally set to 256).
+                _._                                                  
+           _.-``__ ''-._                                             
+      _.-``    `.  `_.  ''-._           Redis 3.2.8 (f2d1eb3c/1) 64 bit
+  .-`` .-```.  ```\/    _.,_ ''-._                                   
+ (    '      ,       .-`  | `,    )     Running in standalone mode
+ |`-._`-...-` __...-.``-._|'` _.-'|     Port: 6379
+ |    `-._   `._    /     _.-'    |     PID: 2885
+  `-._    `-._  `-./  _.-'    _.-'                                   
+ |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+ |    `-._`-._        _.-'_.-'    |           http://redis.io        
+  `-._    `-._`-.__.-'_.-'    _.-'                                   
+ |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+ |    `-._`-._        _.-'_.-'    |                                  
+  `-._    `-._`-.__.-'_.-'    _.-'                                   
+      `-._    `-.__.-'    _.-'                                       
+          `-._        _.-'                                           
+              `-.__.-'                                               
+
+2885:M 29 Apr 09:45:43.755 # Server started, Redis version 3.2.8
+2885:M 29 Apr 09:45:43.846 * DB loaded from disk: 0.089 seconds
+2885:M 29 Apr 09:45:43.846 * The server is now ready to accept connections on port 6379
+2885:signal-handler (1493484346) Received SIGINT scheduling shutdown...
+2885:M 29 Apr 09:45:47.050 # User requested shutdown...
+2885:M 29 Apr 09:45:47.050 * Saving the final RDB snapshot before exiting.
+2885:M 29 Apr 09:45:47.364 * DB saved on disk
+2885:M 29 Apr 09:45:47.365 * Removing the pid file.
+2885:M 29 Apr 09:45:47.365 # Redis is now ready to exit, bye bye...
+2888:M 29 Apr 09:46:38.646 * Increased maximum number of open files to 10032 (it was originally set to 256).
+                _._                                                  
+           _.-``__ ''-._                                             
+      _.-``    `.  `_.  ''-._           Redis 3.2.8 (f2d1eb3c/1) 64 bit
+  .-`` .-```.  ```\/    _.,_ ''-._                                   
+ (    '      ,       .-`  | `,    )     Running in standalone mode
+ |`-._`-...-` __...-.``-._|'` _.-'|     Port: 6379
+ |    `-._   `._    /     _.-'    |     PID: 2888
+  `-._    `-._  `-./  _.-'    _.-'                                   
+ |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+ |    `-._`-._        _.-'_.-'    |           http://redis.io        
+  `-._    `-._`-.__.-'_.-'    _.-'                                   
+ |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+ |    `-._`-._        _.-'_.-'    |                                  
+  `-._    `-._`-.__.-'_.-'    _.-'                                   
+      `-._    `-.__.-'    _.-'                                       
+          `-._        _.-'                                           
+              `-.__.-'                                               
+
+2888:M 29 Apr 09:46:38.824 # Server started, Redis version 3.2.8
+2888:M 29 Apr 09:46:38.979 * DB loaded from disk: 0.089 seconds
+2888:M 29 Apr 09:46:38.979 * The server is now ready to accept connections on port 6379
+2888:signal-handler (1493484433) Received SIGINT scheduling shutdown...
+2888:M 29 Apr 09:47:13.118 # User requested shutdown...
+2888:M 29 Apr 09:47:13.338 * Saving the final RDB snapshot before exiting.
+2888:signal-handler (1493484434) You insist... exiting now.
+2979:M 29 Apr 09:51:50.702 * Increased maximum number of open files to 10032 (it was originally set to 256).
+                _._                                                  
+           _.-``__ ''-._                                             
+      _.-``    `.  `_.  ''-._           Redis 3.2.8 (f2d1eb3c/1) 64 bit
+  .-`` .-```.  ```\/    _.,_ ''-._                                   
+ (    '      ,       .-`  | `,    )     Running in standalone mode
+ |`-._`-...-` __...-.``-._|'` _.-'|     Port: 6379
+ |    `-._   `._    /     _.-'    |     PID: 2979
+  `-._    `-._  `-./  _.-'    _.-'                                   
+ |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+ |    `-._`-._        _.-'_.-'    |           http://redis.io        
+  `-._    `-._`-.__.-'_.-'    _.-'                                   
+ |`-._`-._    `-.__.-'    _.-'_.-'|                                  
+ |    `-._`-._        _.-'_.-'    |                                  
+  `-._    `-._`-.__.-'_.-'    _.-'                                   
+      `-._    `-.__.-'    _.-'                                       
+          `-._        _.-'                                           
+              `-.__.-'                                               
+
+2979:M 29 Apr 09:51:50.723 # Server started, Redis version 3.2.8
+2979:M 29 Apr 09:51:50.816 * DB loaded from disk: 0.091 seconds
+2979:M 29 Apr 09:51:50.816 * The server is now ready to accept connections on port 6379
+2979:signal-handler (1493484713) Received SIGINT scheduling shutdown...
+2979:M 29 Apr 09:51:53.824 # User requested shutdown...
+2979:M 29 Apr 09:51:53.824 * Saving the final RDB snapshot before exiting.
+2979:M 29 Apr 09:51:54.067 * DB saved on disk
+2979:M 29 Apr 09:51:54.067 * Removing the pid file.
+2979:M 29 Apr 09:51:54.067 # Redis is now ready to exit, bye bye...

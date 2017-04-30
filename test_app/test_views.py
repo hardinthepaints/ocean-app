@@ -2,6 +2,7 @@ import os, sys
 import gzip
 import time
 import json
+import test_db_functions
 
 """Test suite to test the endpoints in app/views.py"""
 
@@ -84,91 +85,32 @@ class FlaskrTestCase(unittest.TestCase):
         rv = self.makeGet("/doc/private")
         self.assertOK( rv )
         
+    
     def test_json(self):
-        """Test the json enpoint by querying for existent and nonexistent frames.
-        Then check result for presence of the real frames and lack of the fake ones."""
-        data = {
-            "hours" : [1,2,3]
-        }
-        date = "20170305"
+        endpoint = ENTRY_POINT + '/json'
         
-        endpoint = ENTRY_POINT + '/json/{}'.format(date)
-        rv = self.app.get(  endpoint, query_string=data)
+        headers = getAuthHeaders()
+          
+        rv = self.app.get( endpoint, headers=headers)
         
+        #decompress the data
+        assert "gzip" == rv.headers['Content-Encoding']
+        
+        start = time.time()
+        rv.data = gzip.decompress( rv.data )
+        #print("unzip time: {}".format( time.time()-start ))
+
+        #check authorized
+        self.assertOK(rv)
+        
+        #parse json  
         result = loadJSON( rv.data )
 
         
-        assert '200' in rv.status, "unexpected status. expected {} but got {}".format('200', rv.status)
+        assert len(result)%72 == 0, "Expected length to be a multiple of 72 but got {}".format(str(len(result)))
         
-        assert 'hoursData' in result
-        assert type(result) == type({}), "Unexpected json result type. Expected {} but got {}".format( type({}), type(result) )
-        assert "2017030501" not in result['hoursData']
-        assert "2017030502" in result['hoursData']
-        assert "2017030503" in result['hoursData']
-    
-    def test_jsonsql(self):
-        endpoint = ENTRY_POINT + '/jsonsql'
+        test_db_functions.assertFields(result)
         
-        headers = getAuthHeaders()
-        
-        sizes = {}
-        results = []
-        possible_params = [None, 'gzip=true', "precomp=true"]
-        #test with the gzip parameter
-        for query_string in possible_params:
-                
-            rv = self.app.get( endpoint, query_string=query_string, headers=headers)
-            
-            sizes[ query_string ] = int(rv.headers["Content-Length"])
-            
-            #decompress the data
-            if query_string in possible_params[1:]:
-                assert "gzip" == rv.headers['Content-Encoding']
-                
-                start = time.time()
-                rv.data = gzip.decompress( rv.data )
-                #print("unzip time: {}".format( time.time()-start ))
-
-            #check authorized
-            self.assertOK(rv)
-            
-            #parse json  
-            result = loadJSON( rv.data )
-            
-            #assert that the result is ordered and each row has correct keys
-            last = 0
-            
-            assert len(result) == 72, "Expected 72 frames but got {}".format(str(len(result)))
-            
-            
-            #print ("result: " + str(result))
-            
-            
-            for row in result:
-                
-                for attrib in ["yyyymmddhh", 'z']:
-                    assert attrib in row, "arribute '{}' not found in row".format(attrib)
-                    
-                
-                expectedtype = type([])
-                actual = type(row['z'])
-                assert actual is expectedtype, "Wrong type. expected {} but got {}.".format( expectedtype, actual )
-                
-                
-                expectedtype = type("")
-                actual = type(row['yyyymmddhh'])
-                assert actual is expectedtype, "Wrong type. expected {} but got {}.".format( expectedtype, actual )  
-
-            
-                curr = int(row['yyyymmddhh'] )
-                assert last < curr
-                last = curr
-            results.append(result)
-        
-        #assert the compressed endpoints have equal results and are smaller than uncompressed
-        assert sizes[possible_params[0]] > sizes[possible_params[1]] == sizes[possible_params[2]]
-        assert results[0] == results[1]
-        assert results[1] == results[2]
 
     #NONEXISTENT ENDPOINTS
     def test_notfound(self):
@@ -227,19 +169,6 @@ class ViewsTest(unittest.TestCase):
         #os.close(self.db_fd)
         #os.unlink(app.config['DATABASE'])
         pass
-    
-    #REAL ENDPOINTS
-    def test_hourIsReal(self):
-        
-        assert views.hourIsReal( 9 )
-        assert not views.hourIsReal( 73 )
-        assert not views.hourIsReal( 1 )
-        assert not views.hourIsReal( "hey" )
-    def test_getInt(self):
-        
-        assert views.getInt( "9" ) == 9
-        assert views.getInt( "9da" ) == None
-        assert views.getInt( "-13144" ) == -13144        
     
     
 if __name__ == '__main__':

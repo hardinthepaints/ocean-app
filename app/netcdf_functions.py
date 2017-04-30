@@ -8,43 +8,44 @@ def getDataByHour(date, hour):
     fileName = "app/ncFiles/{}/ocean_his_{}.nc".format( date, hour )
     return getData(1, 0, fileName)
 
-#open a .nc file and collect data
-#Return the specified number of layers
-def getData( end, start, fileName ):
+def getData(end, start, fileName):
     """Get the given range of layers of salinity from the given .nc file. If the range only includes one layer, return None"""
-    try:
-        ds = nc.Dataset( fileName )
-    except:
-        return None
+    ds = nc.Dataset( fileName )
     
-    #ensure the layers correspond to correct indexes
-    end = min( end, len( ds.variables['salt'][0]) )
-    end = max( end, 1 )
-     
-    salts = {}
-
-    for i in range( start, end ):
-        salt = ds.variables['salt'][0, i, :, :].squeeze()
-        salt = salt.tolist()
-        salt = salt[1:-1]
-        for j in range(len(salt)):
-            salt[j] = salt[j][1:-1]
-        #salts[i] = salt
+    output = {}
+    
+    #throw an exception if end and start are not right
+    #its ok to throw exceptions here because the server will not access this code at runtime
+    if not end > start: raise ValueError("parameter 'end' must be greater than start.")
         
-        #flatten
-        #salt = sum(salt,[])
-
-        salts[i] = salt
-
+    for variable in ["salt", "temp"]:
+         
+        data = {}
     
-    #close the dataset
+        for i in range( start, end ):
+            layer = ds.variables[variable][0, i, :, :].squeeze()
+            layer = layer.tolist()
+            
+            layer = trimPerimeter(layer)
+            #layer = layer[1:-1]
+            #for j in range(len(layer)):
+            #    layer[j] = layer[j][1:-1]
+    
+            data[i] = layer
+            
+        if ( len(data) == 0 ):
+            pass
+        elif ( len(data) == 1):
+            output[variable]=data[start]
+        else:
+            output[variable]=data
+        
     ds.close()
     
+    return output
     
     
-    if ( len(salts) == 0 ): return None
-    elif ( len(salts) == 1): return salts[start]
-    else: return salts
+
     
 #flatten a 2 dimensional numpy array
 def flatten( numpy ):
@@ -75,13 +76,13 @@ def getRatio( xvals, yvals ):
     ylength = float(getMax(yvals)) - getMin(yvals)
     return float(xlength) / float(ylength)
 
+
 def trimPerimeter(arr):
-    out = arr[0:-1]
+    """remove a 'border' of data from a 2d array"""
+    out = arr[1:-1]
     for i in range(len(out) ):
-        out[i] = out[i][0:-1]
-        
-    #for pair in zip(arr, arr[1:]):
-        
+        out[i] = out[i][1:-1]
+                
         
     return out
 

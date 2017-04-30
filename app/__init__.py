@@ -6,7 +6,6 @@ from flask import Flask, g
 #allow cross origin requests
 from flask_cors import CORS, cross_origin
 
-
 def getParentDirectory():
     """Get the parent directory of this file. This makes it so the app will work, (and the db will be found)
     no matter the current working directory."""
