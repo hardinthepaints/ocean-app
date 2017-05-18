@@ -7,7 +7,7 @@ A RESTful Flask API which uses redis to expose oceanography data with a visualiz
 ## Installation
 
 1. Install repository and submodule: `git clone --recursive https://github.com/hardinthepaints/ocean-app-server`
-2. Install requirements: `pip install -r requirements.txt`
+2. Install requirements: `pip3 install -r requirements.txt`
 3. Install redis: `brew install redis`
 4. In app/db, run `redis-server redisdb.conf` to start the redis server.
 5. To run the flask development server: `python3 run.py`
