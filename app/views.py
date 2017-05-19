@@ -3,11 +3,10 @@
 from flask import send_from_directory, Response, request, jsonify, url_for, abort
 
 #import modules
-from app import app, auth_functions, compress_functions
+from app import app, compress_functions
 from app.db import db_functions
 gzipped = compress_functions.gzipped
 zipp = compress_functions.zipp
-auth = auth_functions.auth
 getTableAsJson = db_functions.getTableAsJson
 getCompressedTable = db_functions.getCompressedTable
 
@@ -43,7 +42,6 @@ def index(path):
 @app.route('/oceanapp/v1.0/json', methods=['GET'])
 @auto.doc(groups=['private', 'public'])
 @cross_origin(allow_headers="*", expose_headers="Content-length")
-@auth.login_required
 def json():
     """Return json data from the sql db. Login required. If 'gzip=true' in query, then the response will be compressed."""
     status = 200
