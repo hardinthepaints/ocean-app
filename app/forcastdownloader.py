@@ -59,8 +59,9 @@ def ensure_dir(f):
         
 # download a file     
 def downloadFile( url ):
-     
-    final_filename = 'ncFiles/{}/{}'.format( url[1], url[2])
+    
+    abs_filepath = getCurrentDirectory() + 'ncFiles/{}/{}'
+    final_filename = abs_filepath.format( url[1], url[2])
     local_filename = final_filename.replace('.nc', ".temp")
     
     #convert tuple to a string to build the url
