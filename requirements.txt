@@ -21,7 +21,7 @@ Flask_Redis == 0.3.0
 
 # app/db/db_functions.py: 9
 # app/netcdf_functions.py: 3
-netCDF4 == 1.2.4
+netCDF4 == 1.2.8
 
 # app/netcdf_functions.py: 4
 numpy == 1.11.0
