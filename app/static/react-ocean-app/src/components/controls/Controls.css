@@ -1,0 +1,88 @@
+.slider-handle{
+    width: 16px;
+    height: 16px;
+    top: 2px;
+}
+
+.SmallGrayFont{
+  font-family: "helvetica";
+  font-size:30px;
+  color:gray;
+}
+
+.SmallGrayFont :hover{
+  font-family: "helvetica";
+  font-size:30px;
+  color:purple;
+  border:hidden;
+}
+
+.LargeGrayFont{
+  font-family: "helvetica";
+  font-size:50px;
+  color:gray;
+}
+
+.Left{
+  position:fixed;
+  background-color: rgb(94, 94, 94);
+  opacity:1;
+  border-width: 3px;
+  border-color: black;
+  border-radius: 5px;
+  display:compact;
+  z-index: 1;
+  align-items: center;
+  justify-content: space-around;
+  flex-direction: column;
+  height: auto;
+  width:300px;
+  float: left;
+  margin-left: 32px;
+  margin-right: 20px
+
+}
+.Right{
+  z-index: 0;
+  
+  display:flex;
+  justify-content:flex-end;
+  flex-direction:row;
+  
+  float: right;
+  position: absolute;
+  /* left: 50%;*/
+  height: 100%;
+  width: 100%;
+  margin-right: 40px;
+}
+
+.Inner{
+  position: absolute;
+  z-index:1;
+  width:100%;
+  height:100%;
+  background-color:gray;
+  
+}
+
+
+.Wrap{
+  width:auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  height:auto;
+  margin-top:15px;
+  margin-bottom:15px;
+  margin-left: 0px;
+  margin-right: 0px;
+
+}
+
+.ButtonGroup{
+  
+}
+
+
